@@ -11,23 +11,28 @@ const tabs = [
   {
     key: 'Home',
     label: 'Home',
-    icon: require('../Assets/home.png'),
+    icon: require('../Assets/square.png'),
   },
   {
     key: 'Category',
-    label: 'Category',
-    icon: require('../Assets/savings.png'),
-  },
-  {
-    key: 'Cart',
-    label: 'Cart',
-    icon: require('../Assets/cart1.png'),
+    label: 'Order Guide',
+    icon: require('../Assets/star.png'),
   },
 
   {
+    key: 'Cart',
+    label: 'Catalog',
+    icon: require('../Assets/book.png'),
+  },
+  {
+    key: 'Orders',
+    label: 'My Orders',
+    icon: require('../Assets/order.png'),
+  },
+  {
     key: 'Profile',
-    label: 'Profile',
-    icon: require('../Assets/user.png'),
+    label: 'Chat',
+    icon: require('../Assets/chat.png'),
   },
 ];
 
@@ -144,14 +149,14 @@ const styles = StyleSheet.create({
 
   label: {
     marginTop: 4,
-    fontSize: 11,
+    fontSize: 10,
     color: '#9CA3AF',
     fontWeight: '500',
   },
 
   activeLabel: {
     marginTop: 4,
-    fontSize: 11,
+    fontSize: 10,
     color: '#0984e3',
     fontWeight: '700',
   },

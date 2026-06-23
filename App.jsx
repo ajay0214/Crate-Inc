@@ -5,11 +5,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from './Pages/LoginScreen';
 import Dashboard from './Pages/Dashboard';
 
-import CategoryList from './Pages/CategoryList';
+import OrderGuide from './Pages/OrderGuide';
 
 import Profile from './Pages/Profile';
 
-import CartScreen from './Pages/CartScreen';
+import Catolog from './Pages/Catolog';
 
 
 
@@ -42,8 +42,8 @@ const App = () => {
 
 
                 <Stack.Screen
-                    name="CategoryList"
-                    component={CategoryList}
+                    name="OrderGuide"
+                    component={OrderGuide}
                     options={{
                         headerShown: false,
                     }} />
@@ -58,8 +58,8 @@ const App = () => {
 
 
                 <Stack.Screen
-                    name="CartScreen"
-                    component={CartScreen}
+                    name="Catolog"
+                    component={Catolog}
                     options={{
                         headerShown: false,
                     }} />

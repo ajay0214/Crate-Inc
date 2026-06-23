@@ -194,6 +194,16 @@ export default function LoginScreen({ navigation }) {
         ]).start();
     }, []);
 
+    useEffect(() => {
+        if (showOtpCard) {
+            const timer = setTimeout(() => {
+                otpRefs.current[0]?.focus();
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showOtpCard]);
+
     const handleOtpChange = (value, index) => {
         const newOtp = [...otp];
         newOtp[index] = value;
@@ -204,6 +214,14 @@ export default function LoginScreen({ navigation }) {
         }
 
         const otpValue = newOtp.join('');
+
+        if (otpValue.length === 6) {
+            setError('');
+
+            setTimeout(() => {
+                navigation.replace('Dashboard');
+            }, 300);
+        }
     };
 
     const handleVerifyOtp = () => {
@@ -286,7 +304,7 @@ export default function LoginScreen({ navigation }) {
                             <View style={styles.logoRing}>
                                 <View style={styles.logoBadge}>
                                     <Image
-                                        source={require('../Assets/crate-inc.png')}
+                                        source={require('../Assets/crate-inc-new.png')}
                                         style={styles.logoImage}
                                         resizeMode="contain"
                                     />
@@ -347,7 +365,9 @@ export default function LoginScreen({ navigation }) {
                                             renderFlagButton={() => null}
                                         />
                                         <Text style={styles.countryText}>+{callingCode}</Text>
-                                        <Text style={styles.dropdownIcon}>⌄</Text>
+                                        <Text style={styles.dropdownIcon}>v</Text>
+
+
                                     </TouchableOpacity>
 
                                     <TextInput
@@ -379,7 +399,7 @@ export default function LoginScreen({ navigation }) {
                                         <ActivityIndicator color={C.white} size="small" />
                                     ) : (
                                         <View style={styles.loginBtnInner}>
-                                            <Text style={styles.loginBtnText}>Send Otp</Text>
+                                            <Text style={styles.loginBtnText}>Send OTP</Text>
                                             <View style={styles.loginBtnArrowBadge}>
                                                 <Text style={styles.loginBtnArrow}>→</Text>
                                             </View>
@@ -411,7 +431,7 @@ export default function LoginScreen({ navigation }) {
                                         <Text style={[styles.cardTitle, { textAlign: 'center' }]}>
                                             Enter OTP
                                         </Text>
-                                        <View style={{ marginLeft: 0, marginTop: -5, width: 50, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 50 }}>
+                                        <View style={{ marginLeft: 0, marginTop: -10, width: 50, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 50 }}>
                                             <Image
                                                 source={require('../Assets/protect.png')}
                                                 style={styles.otpHeaderIcon}
@@ -462,7 +482,7 @@ export default function LoginScreen({ navigation }) {
                                     activeOpacity={0.9}
                                 >
                                     <View style={styles.loginBtnInner}>
-                                        <Text style={styles.loginBtnText}>Verify and continue</Text>
+                                        <Text style={styles.loginBtnText}> Login</Text>
                                         <View style={styles.loginBtnArrowBadge}>
                                             <Text style={styles.loginBtnArrow}>→</Text>
                                         </View>
@@ -673,6 +693,8 @@ const styles = StyleSheet.create({
         marginBottom: 22,
         borderTopLeftRadius: 28,
         borderTopRightRadius: 28,
+        width: 500,
+        alignSelf: 'center'
     },
     cardHeader: {
         marginBottom: 18,      // was 22
@@ -780,6 +802,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.25)',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingBottom: 5
     },
     loginBtnArrow: {
         color: C.white,
@@ -915,9 +938,11 @@ const styles = StyleSheet.create({
         fontSize: 12,          // was 14
         fontWeight: '700',
         color: '#111827',
+        marginLeft: 20
     },
     dropdownIcon: {
-        fontSize: 15,          // was 17
+        fontSize: 13,
+        fontWeight: 600,          // was 17
         color: '#111827',
     },
     phoneInput: {
@@ -949,6 +974,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         marginBottom: 8,
+
     },
     titleIcon: {
         width: 24,
@@ -1021,7 +1047,7 @@ const styles = StyleSheet.create({
     },
     otpMessageText: {
         color: '#64748B',
-        fontSize: 11,          // was 13
+        fontSize: 10,          // was 13
         fontWeight: '600',
     },
 });

@@ -1,22 +1,3 @@
-/**
- * CartScreen.jsx — AlohaMart Grocery App
- *
- * Fully self-contained cart screen. No external context needed.
- * Drop this file in your project and navigate to it with:
- *   navigation.navigate('CartScreen', { initialItems: [...] })
- *
- * OR pass cartItems as a prop from your global state.
- *
- * Features:
- *  - Cart items list with qty +/- controls & delete
- *  - Free delivery progress bar
- *  - Coupon code input (try: SAVE50 / FRESH100 / ALOHA20)
- *  - Full bill summary (subtotal, discount, delivery, coupon, total)
- *  - Animated slide-in items
- *  - Empty cart state
- *  - Live cart count badge in header + bottom tab bar
- *  - Proceed to Checkout CTA
- */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {

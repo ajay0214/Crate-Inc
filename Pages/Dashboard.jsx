@@ -1,212 +1,358 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
+    SafeAreaView,
+    ScrollView,
     View,
     Text,
+    Image,
+    FlatList,
     TouchableOpacity,
     StyleSheet,
-    SafeAreaView,
+    Dimensions,
     StatusBar,
-    ScrollView,
-    Dimensions, Image
 } from 'react-native';
+import {
+    Menu,
+    ShoppingCart,
+    ChevronRight,
+    ArrowRight,
+    BookOpen,
+    ShoppingBag,
+    ClipboardList,
+    MessageSquare,
+    Package,
+} from 'lucide-react-native';
 import CustomBottomTab from './CustomBottomTab';
 
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const H_PADDING = 16;
+const SLIDE_WIDTH = SCREEN_WIDTH - H_PADDING * 2;
+const AUTO_SLIDE_INTERVAL = 4000;
 
-// ─── Color Tokens ─────────────────────────────────────────────────────────────
-const C = {
-    blue: '#1A6FDB',
-    blueLight: '#E8F0FB',
-    white: '#FFFFFF',
-    pageBg: '#F0F4FA',
-    heroBg: '#D9E6F7',
-    textDark: '#0D1117',
-    textMid: '#3C3C43',
-    textMuted: '#6B7280',
-    border: '#E5E7EB',
-    greenBg: '#E6F4EA',
-    greenText: '#1A7A3C',
-    greenBorder: '#A3D9B1',
-    orangeBg: '#FFF3E0',
-    orangeText: '#C46A00',
-    orangeBorder: '#FFCA80',
-    avatarBg: '#CBD5E1',
-    cartBadge: '#1A6FDB',
-};
+const heroSlides = [
+    {
+        id: '1',
+        eyebrow: 'BUNDLE AND SAVE',
+        title: 'Fresh produce and proteins, one great price',
+        subtitle: 'Build a better kitchen with our weekly fresh-food bundle.',
+        buttonText: 'Explore the bundle',
+        image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=900&q=80',
+    },
+    {
+        id: '2',
+        eyebrow: 'BUNDLE AND SAVE',
+        title: 'Stock your pantry, save every week',
+        subtitle: 'Build a better kitchen with our weekly fresh-food bundle.',
+        buttonText: 'Explore the bundle',
+        image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80',
+    },
+    {
+        id: '3',
+        eyebrow: 'BUNDLE AND SAVE',
+        title: 'Protein and produce, bundled better',
+        subtitle: 'Build a better kitchen with our weekly fresh-food bundle.',
+        buttonText: 'Explore the bundle',
+        image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=900&q=80',
+    },
+];
 
-// ─── Header ───────────────────────────────────────────────────────────────────
-function Header({ navigation }) {
-    return (
+const quickActions = [
+    {
+        id: 'order-guide',
+        title: 'Order Guide',
+        subtitle: 'Step-by-step ordering',
+        icon: BookOpen,
+        iconBg: '#D1FAE5',
+        iconColor: '#059669',
+    },
+    {
+        id: 'browse-catalog',
+        title: 'Browse Catalog',
+        subtitle: 'Explore all products',
+        icon: ShoppingBag,
+        iconBg: '#DBEAFE',
+        iconColor: '#2563EB',
+    },
+    {
+        id: 'recent-orders',
+        title: 'Recent Orders',
+        subtitle: 'View your past orders',
+        icon: ClipboardList,
+        iconBg: '#EDE9FE',
+        iconColor: '#7C3AED',
+    },
+    {
+        id: 'messages',
+        title: 'Messages',
+        subtitle: 'Contact your team',
+        icon: MessageSquare,
+        iconBg: '#CFFAFE',
+        iconColor: '#0891B2',
+    },
+];
+
+const recentOrders = [
+    {
+        id: 'BVCX90',
+        channel: 'App/Web',
+        placedDate: 'Jun 5, 2026',
+        placedTime: '2:35 PM',
+        delivery: 'Jun 6, 2026',
+    },
+    {
+        id: 'BVCX89',
+        channel: 'App/Web',
+        placedDate: 'Jun 3, 2026',
+        placedTime: '10:12 AM',
+        delivery: 'Jun 4, 2026',
+    },
+    {
+        id: 'BVCX88',
+        channel: 'App/Web',
+        placedDate: 'Jun 1, 2026',
+        placedTime: '9:00 AM',
+        delivery: 'Jun 2, 2026',
+    },
+];
+
+/* ================================================================== */
+/*  SCREEN COMPONENT                                                    */
+/* ================================================================== */
+
+export default function DashboardScreen({ navigation }) {
+    /* ---------- Header ---------- */
+    const Header = () => (
         <View style={styles.header}>
-            {/* Sidebar toggle — two lines */}
-            <TouchableOpacity style={styles.menuBtn}>
-                <View style={styles.menuLine} />
-                <View style={[styles.menuLine, { width: 14 }]} />
+            <TouchableOpacity style={styles.menuButton} activeOpacity={0.7}>
+                <Menu size={22} color="#111827" />
             </TouchableOpacity>
 
-            {/* Title block */}
-            <View style={styles.headerTitle}>
-                <Text style={styles.headerTitleText}>Overview</Text>
+            <View style={styles.headerTitleWrap}>
+                <Text style={styles.headerTitle}>Overview</Text>
                 <Text style={styles.headerSubtitle}>Track orders and business operations</Text>
             </View>
 
-            {/* Right: Avatar + Cart */}
             <View style={styles.headerRight}>
-                <View style={styles.avatar}>
+                <TouchableOpacity style={styles.avatar} activeOpacity={0.7}>
                     <Text style={styles.avatarText}>AV</Text>
-                </View>
-                <View style={styles.cartWrap}>
-                    <Image source={require('../Assets/carts.png')} style={styles.cartIcon} />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.cartButton} activeOpacity={0.7}>
+                    <ShoppingCart size={20} color="#2563EB" />
                     <View style={styles.cartBadge}>
                         <Text style={styles.cartBadgeText}>0</Text>
                     </View>
-                </View>
+                </TouchableOpacity>
             </View>
         </View>
     );
-}
 
-// ─── Hero Card ────────────────────────────────────────────────────────────────
-function HeroCard() {
-    return (
+    /* ---------- Hero auto slider ---------- */
+    const flatListRef = useRef(null);
+    const activeIndexRef = useRef(0);
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    const [activeTab, setActiveTab] = useState('Home');
+
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const nextIndex = (activeIndexRef.current + 1) % heroSlides.length;
+            flatListRef.current?.scrollToOffset({
+                offset: nextIndex * SLIDE_WIDTH,
+                animated: true,
+            });
+            activeIndexRef.current = nextIndex;
+            setActiveIndex(nextIndex);
+        }, AUTO_SLIDE_INTERVAL);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    const onSlideMomentumEnd = (e) => {
+        const index = Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH);
+        activeIndexRef.current = index;
+        setActiveIndex(index);
+    };
+
+    const renderSlide = ({ item }) => (
+        <View style={[styles.slide, { width: SLIDE_WIDTH }]}>
+            <View style={styles.slideTextWrap}>
+                <Text style={styles.slideEyebrow}>{item.eyebrow}</Text>
+                <Text style={styles.slideTitle}>{item.title}</Text>
+                <Text style={styles.slideSubtitle}>{item.subtitle}</Text>
+
+                <TouchableOpacity style={styles.slideButton} activeOpacity={0.85}>
+                    <Text style={styles.slideButtonText}>{item.buttonText}</Text>
+                    <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                </TouchableOpacity>
+            </View>
+
+            <Image source={{ uri: item.image }} style={styles.slideImage} resizeMode="cover" />
+        </View>
+    );
+
+    const HeroSlider = () => (
         <View style={styles.heroCard}>
-            <Text style={styles.heroGreeting}>Welcome back,</Text>
-            <View style={styles.heroNameRow}>
-                <Text style={styles.heroName}>Crate Inc.</Text>
-                <Text style={styles.heroEmoji}>👋</Text>
-            </View>
-            <Text style={styles.heroSub}>Here's what's happening with your account today.</Text>
+            <FlatList
+                ref={flatListRef}
+                data={heroSlides}
+                keyExtractor={(item) => item.id}
+                renderItem={renderSlide}
+                horizontal
+                pagingEnabled
+                snapToInterval={SLIDE_WIDTH}
+                decelerationRate="fast"
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={onSlideMomentumEnd}
+                bounces={false}
+            />
 
-            {/* Primary CTA */}
-            <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.88}>
-                <Image source={require('../Assets/carts.png')} style={styles.primaryBtnIcon} />
-
-                <Text style={styles.primaryBtnText}>Start Order Guide</Text>
-            </TouchableOpacity>
-
-            {/* Secondary buttons */}
-            <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.88}>
-                <Image source={require('../Assets/book.png')} style={styles.secondaryBtnIcon} />
-
-                <Text style={styles.secondaryBtnText}>Browse Catalog</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.88}>
-                <Text style={styles.secondaryBtnIcon}>📅</Text>
-                <Text style={styles.secondaryBtnText}>View Orders</Text>
-            </TouchableOpacity>
-        </View>
-    );
-}
-
-// ─── Recent Orders Header Card ────────────────────────────────────────────────
-function RecentOrdersHeader({ onViewAll }) {
-    return (
-        <View style={styles.recentHeaderCard}>
-            {/* Left: icon + title + subtitle */}
-            <View style={styles.recentHeaderLeft}>
-                <View style={styles.recentIconWrap}>
-                    <Text style={styles.recentIcon}>📦</Text>
-                </View>
-                <View>
-                    <Text style={styles.recentTitle}>Recent Orders</Text>
-                    <Text style={styles.recentSubtitle}>View and manage your recent orders</Text>
-                </View>
-            </View>
-
-            {/* Divider inside card */}
-            <View style={styles.recentDivider} />
-
-            {/* View Orders link row */}
-            <TouchableOpacity style={styles.viewOrdersRow} onPress={onViewAll} activeOpacity={0.7}>
-                <Text style={styles.viewOrdersText}>View Orders</Text>
-                <Text style={styles.viewOrdersChevron}> ›</Text>
-            </TouchableOpacity>
-        </View>
-    );
-}
-
-// ─── Order Item Card ──────────────────────────────────────────────────────────
-function OrderCard({ orderId, status, items, amount }) {
-    const isDelivered = status === 'Delivered';
-
-    return (
-        <TouchableOpacity style={styles.orderCard} activeOpacity={0.85}>
-            {/* Truck icon in green circle */}
-            <View style={styles.orderIconWrap}>
-                <Text style={styles.orderIcon}>🚚</Text>
-            </View>
-
-            {/* Order details */}
-            <View style={styles.orderDetails}>
-                <View style={styles.orderTopRow}>
-                    <Text style={styles.orderId}>{orderId}</Text>
-                    <View style={[
-                        styles.badge,
-                        isDelivered ? styles.badgeDelivered : styles.badgeOrderSent,
-                    ]}>
-                        <Text style={[
-                            styles.badgeText,
-                            isDelivered ? styles.badgeDeliveredText : styles.badgeOrderSentText,
-                        ]}>
-                            {status}
-                        </Text>
-                    </View>
-                </View>
-                <Text style={styles.orderMeta}>{items} - App/Web - {amount}</Text>
-            </View>
-
-            {/* Chevron */}
-            <Text style={styles.chevron}>›</Text>
-        </TouchableOpacity>
-    );
-}
-
-// ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function DashboardScreen({ navigation }) {
-    const orders = [
-        { id: 'Order #BVCX90', status: 'Order Sent', items: '2 items', amount: '$142.50' },
-        { id: 'Order #BVCX89', status: 'Delivered', items: '2 items', amount: '$287.40' },
-        { id: 'Order #BVCX88', status: 'Delivered', items: '2 items', amount: '$287.40' },
-        { id: 'Order #BVCX87', status: 'Delivered', items: '2 items', amount: '$287.40' },
-        { id: 'Order #BVCX84', status: 'Delivered', items: '2 items', amount: '$287.40' },
-        { id: 'Order #BVCX83', status: 'Delivered', items: '2 items', amount: '$287.40' },
-    ];
-
-    return (
-        <SafeAreaView style={styles.safe}>
-            <StatusBar barStyle="dark-content" backgroundColor={C.pageBg} />
-
-            <Header navigation={navigation} />
-
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={[
-                    styles.scrollContent,
-                    { paddingBottom: 120 }
-                ]}
-                showsVerticalScrollIndicator={false}
-            >
-                {/* ── Hero ── */}
-                <HeroCard />
-
-                {/* ── Recent Orders header card ── */}
-                <RecentOrdersHeader onViewAll={() => { }} />
-
-                {/* ── Each order as its own card ── */}
-                {orders.map((o) => (
-                    <OrderCard
-                        key={o.id}
-                        orderId={o.id}
-                        status={o.status}
-                        items={o.items}
-                        amount={o.amount}
+            <View style={styles.dotsWrap}>
+                {heroSlides.map((_, i) => (
+                    <View
+                        key={i}
+                        style={[styles.dot, i === activeIndex ? styles.dotActive : styles.dotInactive]}
                     />
                 ))}
+            </View>
+        </View>
+    );
 
+    /* ---------- Quick actions grid ---------- */
+    const QuickActions = () => (
+        <View style={styles.actionsGrid}>
+            {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                    <TouchableOpacity key={action.id} style={styles.actionCard} activeOpacity={0.7}>
+                        <View style={[styles.actionIconWrap, { backgroundColor: action.iconBg }]}>
+                            <Icon size={20} color={action.iconColor} />
+                        </View>
+                        <Text style={styles.actionTitle}>{action.title}</Text>
+                        <Text style={styles.actionSubtitle}>{action.subtitle}</Text>
+                    </TouchableOpacity>
+                );
+            })}
+        </View>
+    );
+
+    /* ---------- Quick Order Guides section ---------- */
+    const QuickOrderGuides = () => (
+        <View style={styles.card}>
+            {/* Section header row */}
+            <View style={styles.sectionHeaderRow}>
+                <View style={[styles.sectionIconWrap, { backgroundColor: '#D1FAE5' }]}>
+                    <BookOpen size={18} color="#059669" />
+                </View>
+
+                <View style={styles.sectionHeaderTextWrap}>
+                    <Text style={styles.sectionTitle}>Quick Order Guides</Text>
+                    <Text style={styles.sectionSubtitle}>Select guides to add their products</Text>
+                </View>
+
+                <TouchableOpacity style={styles.chevronButton} activeOpacity={0.7}>
+                    <ChevronRight size={18} color="#6B7280" />
+                </TouchableOpacity>
+            </View>
+
+            {/* Empty state */}
+            <View style={styles.emptyStateWrap}>
+                <View style={styles.emptyIconCircle}>
+                    <BookOpen size={26} color="#93C5FD" />
+                </View>
+                <Text style={styles.emptyTitle}>No Order Guides Yet</Text>
+                <Text style={styles.emptySubtitle}>
+                    Create a reusable guide for{'\n'}products you order regularly.
+                </Text>
+            </View>
+
+            {/* Bottom action row */}
+            <View style={styles.guideActionRow}>
+                <TouchableOpacity activeOpacity={0.7}>
+                    <Text style={styles.selectAllText}>Select all</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.addToCartButton} activeOpacity={0.85}>
+                    <ShoppingCart size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.addToCartText}>Add to cart</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+
+    /* ---------- Recent Orders section ---------- */
+    const RecentOrders = () => (
+        <View style={[styles.card, { marginTop: 8 }]}>
+            {/* Section header row */}
+            <View style={styles.sectionHeaderRow}>
+                <View style={[styles.sectionIconWrap, { backgroundColor: '#EDE9FE' }]}>
+                    <Package size={18} color="#7C3AED" />
+                </View>
+
+                <View style={styles.sectionHeaderTextWrap}>
+                    <Text style={styles.sectionTitle}>Recent Orders</Text>
+                    <Text style={styles.sectionSubtitle}>View and manage your latest orders</Text>
+                </View>
+            </View>
+
+            {/* View all orders button */}
+            <TouchableOpacity style={styles.viewAllButton} activeOpacity={0.7}>
+                <Text style={styles.viewAllText}>View all orders</Text>
+                <ChevronRight size={16} color="#111827" />
+            </TouchableOpacity>
+
+            {/* Table header */}
+            <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>ORDER</Text>
+                <Text style={[styles.tableHeaderCell, { flex: 1.4 }]}>PLACED ON</Text>
+                <Text style={[styles.tableHeaderCell, { flex: 1 }]}>DELIVERY</Text>
+            </View>
+
+            {/* Table rows */}
+            {recentOrders.map((order, index) => (
+                <View
+                    key={order.id}
+                    style={[
+                        styles.tableRow,
+                        index < recentOrders.length - 1 && styles.tableRowBorder,
+                    ]}
+                >
+                    <View style={{ flex: 1.2 }}>
+                        <Text style={styles.orderIdText}>#{order.id}</Text>
+                        <Text style={styles.orderChannelText}>{order.channel}</Text>
+                    </View>
+                    <View style={{ flex: 1.4 }}>
+                        <Text style={styles.orderDateText}>{order.placedDate}</Text>
+                        <Text style={styles.orderTimeText}>{order.placedTime}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.orderDateText}>{order.delivery}</Text>
+                    </View>
+                </View>
+            ))}
+        </View>
+    );
+
+    /* ---------- Full screen ---------- */
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+            <Header />
+
+            <ScrollView
+                contentContainerStyle={{
+                    ...styles.scrollContent,
+                    paddingBottom: 100,
+                }}
+                showsVerticalScrollIndicator={false}
+            >
+                <HeroSlider />
+                <QuickActions />
+                <QuickOrderGuides />
+                <RecentOrders />
             </ScrollView>
-
             <CustomBottomTab
                 activeTab='Home'
                 onTabPress={(tab) => {
@@ -218,11 +364,11 @@ export default function DashboardScreen({ navigation }) {
                             break;
 
                         case 'Category':
-                            navigation.navigate('CategoryList');
+                            navigation.navigate('OrderGuide');
                             break;
 
                         case 'Cart':
-                            navigation.navigate('CartScreen');
+                            navigation.navigate('Catolog');
                             break;
 
 
@@ -237,314 +383,367 @@ export default function DashboardScreen({ navigation }) {
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+/* ================================================================== */
+/*  STYLES                                                              */
+/* ================================================================== */
 const styles = StyleSheet.create({
-    safe: {
+    safeArea: {
         flex: 1,
-        backgroundColor: C.pageBg,
+        backgroundColor: '#FFFFFF',
+    },
+    scrollContent: {
+        paddingBottom: 32,
     },
 
-    // ── Header ──
+    /* Header */
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: C.pageBg,
-        gap: 10,
-        marginTop: 20
+        paddingHorizontal: H_PADDING,
+        paddingTop: 12,
+        paddingBottom: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F2F4',
+        marginTop: 18
     },
-    menuBtn: {
-        width: 36,
-        height: 36,
+    menuButton: {
+        width: 34,
+        height: 34,
+        alignItems: 'center',
         justifyContent: 'center',
-        gap: 5,
     },
-    menuLine: {
-        height: 2,
-        width: 20,
-        backgroundColor: C.textDark,
-        borderRadius: 2,
+    headerTitleWrap: {
+        flex: 1,
+        marginLeft: 8,
     },
     headerTitle: {
-        flex: 1,
-    },
-    headerTitleText: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '700',
-        color: C.textDark,
+        color: '#111827',
     },
     headerSubtitle: {
-        fontSize: 12,
-        color: C.textMuted,
-        marginTop: 1,
+        fontSize: 12.5,
+        color: '#9CA3AF',
+        marginTop: 2,
     },
     headerRight: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
     },
     avatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: C.avatarBg,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#E5E7EB',
         alignItems: 'center',
         justifyContent: 'center',
+        marginRight: 12,
     },
     avatarText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '700',
-        color: C.textMid,
+        color: '#374151',
     },
-    cartWrap: {
-        position: 'relative',
-        width: 36,
-        height: 36,
+    cartButton: {
+        width: 32,
+        height: 32,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    cartIcon: {
-        width: 23,
-        height: 23,
     },
     cartBadge: {
         position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 16,
+        top: -4,
+        right: -6,
+        minWidth: 16,
         height: 16,
         borderRadius: 8,
-        backgroundColor: C.cartBadge,
+        backgroundColor: '#2563EB',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingHorizontal: 3,
     },
     cartBadgeText: {
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: '700',
-        color: C.white,
+        color: '#FFFFFF',
     },
 
-    // ── Scroll ──
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: 14,
-        paddingBottom: 36,
-        gap: 10,
-    },
-
-    // ── Hero Card ──
+    /* Hero slider */
     heroCard: {
-        backgroundColor: C.heroBg,
-        borderRadius: 18,
-        padding: 18,
-        gap: 10,
-        marginBottom: 4,
-    },
-    heroGreeting: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: C.textDark,
-    },
-    heroNameRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    heroName: {
-        fontSize: 26,
-        fontWeight: '800',
-        color: C.textDark,
-        letterSpacing: -0.5,
-    },
-    heroEmoji: {
-        fontSize: 24,
-    },
-    heroSub: {
-        fontSize: 13,
-        color: C.textMuted,
-        lineHeight: 19,
-        marginBottom: 4,
-    },
-
-    // ── Hero Buttons ──
-    primaryBtn: {
-        backgroundColor: C.blue,
-        borderRadius: 12,
-        height: 50,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        marginTop: 4,
-    },
-    primaryBtnIcon: {
-        width: 26,
-        height: 26,
-        tintColor: '#fff'
-    },
-    primaryBtnText: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: C.white,
-    },
-    secondaryBtn: {
-        backgroundColor: C.white,
-        borderRadius: 12,
-        height: 50,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        gap: 10,
-    },
-    secondaryBtnIcon: {
-        width: 24,
-        height: 24,
-        tintColor: C.textDark
-    },
-    secondaryBtnText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: C.textDark,
-    },
-
-    // ── Recent Orders Header Card ──
-    recentHeaderCard: {
-        backgroundColor: C.white,
-        borderRadius: 16,
-        paddingTop: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
+        marginHorizontal: H_PADDING,
+        marginTop: 16,
+        borderRadius: 20,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#F1F2F4',
         overflow: 'hidden',
-    },
-    recentHeaderLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        paddingHorizontal: 16,
         paddingBottom: 14,
     },
-    recentIconWrap: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: C.blueLight,
+    slide: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 20,
+    },
+    slideTextWrap: {
+        flex: 1,
+        paddingLeft: 18,
+        paddingRight: 8,
+    },
+    slideEyebrow: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#16A34A',
+        letterSpacing: 0.5,
+        marginBottom: 8,
+    },
+    slideTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#111827',
+        lineHeight: 26,
+        marginBottom: 8,
+    },
+    slideSubtitle: {
+        fontSize: 13,
+        color: '#6B7280',
+        marginBottom: 16,
+        lineHeight: 18,
+    },
+    slideButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        backgroundColor: '#2563EB',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 24,
+    },
+    slideButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 13,
+    },
+    slideImage: {
+        width: '42%',
+        height: 165,
+        borderRadius: 14,
+        marginRight: 14,
+    },
+    dotsWrap: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    dot: {
+        height: 6,
+        borderRadius: 3,
+        marginHorizontal: 3,
+    },
+    dotActive: {
+        width: 18,
+        backgroundColor: '#2563EB',
+    },
+    dotInactive: {
+        width: 6,
+        backgroundColor: '#E5E7EB',
+    },
+
+    /* Quick actions grid */
+    actionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: H_PADDING,
+        marginTop: 16,
+    },
+    actionCard: {
+        width: '48.5%',
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#F1F2F4',
+        borderRadius: 16,
+        padding: 14,
+        marginBottom: 12,
+    },
+    actionIconWrap: {
+        width: 34,
+        height: 34,
+        borderRadius: 17,
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: 10,
     },
-    recentIcon: {
-        fontSize: 18,
+    actionTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 2,
     },
-    recentTitle: {
+    actionSubtitle: {
+        fontSize: 12,
+        color: '#9CA3AF',
+    },
+
+    /* Generic card / section header */
+    card: {
+        marginHorizontal: H_PADDING,
+        marginTop: 4,
+        marginBottom: 4,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#F1F2F4',
+        borderRadius: 18,
+        padding: 16,
+    },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    sectionIconWrap: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    sectionHeaderTextWrap: {
+        flex: 1,
+    },
+    sectionTitle: {
         fontSize: 15,
         fontWeight: '700',
-        color: C.textDark,
+        color: '#111827',
     },
-    recentSubtitle: {
+    sectionSubtitle: {
         fontSize: 12,
-        color: C.textMuted,
+        color: '#9CA3AF',
         marginTop: 2,
     },
-    recentDivider: {
-        height: 1,
-        backgroundColor: C.border,
-        marginHorizontal: 0,
-    },
-    viewOrdersRow: {
-        flexDirection: 'row',
+    chevronButton: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 14,
-    },
-    viewOrdersText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: C.textDark,
-    },
-    viewOrdersChevron: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: C.textDark,
     },
 
-    // ── Order Card (each order = own card) ──
-    orderCard: {
-        backgroundColor: C.white,
-        borderRadius: 16,
-        flexDirection: 'row',
+    /* Quick Order Guides – empty state */
+    emptyStateWrap: {
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        gap: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
+        paddingVertical: 24,
     },
-    orderIconWrap: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: C.greenBg,
+    emptyIconCircle: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#EFF6FF',
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: 14,
     },
-    orderIcon: {
-        fontSize: 18,
+    emptyTitle: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 6,
     },
-    orderDetails: {
-        flex: 1,
-        gap: 4,
+    emptySubtitle: {
+        fontSize: 13,
+        color: '#9CA3AF',
+        textAlign: 'center',
+        lineHeight: 19,
     },
-    orderTopRow: {
+
+    /* Quick Order Guides – bottom action row */
+    guideActionRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        borderTopWidth: 1,
+        borderTopColor: '#F1F2F4',
+        paddingTop: 14,
+        marginTop: 4,
     },
-    orderId: {
+    selectAllText: {
+        fontSize: 14,
+        color: '#6B7280',
+        fontWeight: '500',
+    },
+    addToCartButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#93C5FD',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 24,
+    },
+    addToCartText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 14,
+    },
+
+    /* Recent Orders */
+    viewAllButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 10,
+        paddingVertical: 11,
+        paddingHorizontal: 14,
+        marginBottom: 16,
+    },
+    viewAllText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#111827',
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        paddingBottom: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F2F4',
+        marginBottom: 4,
+    },
+    tableHeaderCell: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#9CA3AF',
+        letterSpacing: 0.4,
+    },
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 14,
+    },
+    tableRowBorder: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F2F4',
+    },
+    orderIdText: {
         fontSize: 14,
         fontWeight: '700',
-        color: C.textDark,
+        color: '#111827',
+        marginBottom: 2,
     },
-    orderMeta: {
+    orderChannelText: {
         fontSize: 12,
-        color: C.textMuted,
+        color: '#9CA3AF',
     },
-    chevron: {
-        fontSize: 20,
-        color: C.textMuted,
+    orderDateText: {
+        fontSize: 12,
+        color: '#374151',
+        fontWeight: '500',
+        marginBottom: 2,
     },
-
-    // ── Badges ──
-    badge: {
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 20,
-        borderWidth: 1,
-    },
-    badgeText: {
-        fontSize: 11,
-        fontWeight: '600',
-    },
-    badgeOrderSent: {
-        backgroundColor: C.greenBg,
-        borderColor: C.greenBorder,
-    },
-    badgeOrderSentText: {
-        color: C.greenText,
-    },
-    badgeDelivered: {
-        backgroundColor: C.orangeBg,
-        borderColor: C.orangeBorder,
-    },
-    badgeDeliveredText: {
-        color: C.orangeText,
+    orderTimeText: {
+        fontSize: 12,
+        color: '#9CA3AF',
     },
 });
