@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 const tabs = [
   {
@@ -36,11 +30,7 @@ const tabs = [
   },
 ];
 
-const CustomBottomTab = ({
-  activeTab,
-  onTabPress,
-  cartCount = 0,
-}) => {
+const CustomBottomTab = ({ activeTab, onTabPress, cartCount = 0 }) => {
   return (
     <View style={styles.container}>
       {tabs.map(tab => {
@@ -125,8 +115,8 @@ const styles = StyleSheet.create({
   },
 
   activeIconContainer: {
-    width: 50,
-    height: 50,
+    width: 44,
+    height: 44,
     borderRadius: 16,
 
     backgroundColor: '#6fafe021',
@@ -136,28 +126,28 @@ const styles = StyleSheet.create({
   },
 
   icon: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     tintColor: '#9CA3AF',
   },
 
   activeIcon: {
-    width: 24,
-    height: 24,
-    tintColor: '#0984e3',
+    width: 22,
+    height: 22,
+    tintColor: '#2e86de',
   },
 
   label: {
     marginTop: 4,
-    fontSize: 10,
+    fontSize: 9,
     color: '#9CA3AF',
     fontWeight: '500',
   },
 
   activeLabel: {
     marginTop: 4,
-    fontSize: 10,
-    color: '#0984e3',
+    fontSize: 9,
+    color: '#2e86de',
     fontWeight: '700',
   },
   badge: {
