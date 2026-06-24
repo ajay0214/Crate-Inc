@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   View,
   Text,
@@ -11,16 +10,18 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Menu,
   ShoppingCart,
   ChevronRight,
   ArrowRight,
-  BookOpen,
-  ShoppingBag,
-  ClipboardList,
-  MessageSquare,
   Package,
+  CheckCircle,
+  Send,
+  XCircle,
+  DollarSign,
+  TrendingUp,
 } from 'lucide-react-native';
 import CustomBottomTab from './CustomBottomTab';
 
@@ -59,6 +60,7 @@ const heroSlides = [
   },
 ];
 
+/* recentOrders — mixed statuses so dashboard stats are meaningful */
 const recentOrders = [
   {
     id: '10234',
@@ -71,7 +73,7 @@ const recentOrders = [
   },
   {
     id: '10198',
-    status: 'Delivered',
+    status: 'Sent',
     date: 'Apr 22, 2024',
     items: 18,
     amount: '$210.00',
@@ -80,14 +82,39 @@ const recentOrders = [
   },
   {
     id: '10172',
-    status: 'Delivered',
+    status: 'Cancelled',
     date: 'Apr 10, 2024',
     items: 31,
     amount: '$415.75',
     image:
       'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=200&q=80',
   },
+  {
+    id: '10155',
+    status: 'Delivered',
+    date: 'Apr 1, 2024',
+    items: 15,
+    amount: '$180.00',
+    image:
+      'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=200&q=80',
+  },
 ];
+
+/* ── helpers ── */
+const parseDollar = str => parseFloat(str.replace('$', ''));
+
+const getStatusBadge = status => {
+  switch (status) {
+    case 'Delivered':
+      return { bg: '#D1FAE5', text: '#059669' };
+    case 'Sent':
+      return { bg: '#EFF6FF', text: '#2e86de' };
+    case 'Cancelled':
+      return { bg: '#FEE2E2', text: '#ee5253' };
+    default:
+      return { bg: '#F3F4F6', text: '#6B7280' };
+  }
+};
 
 /* ================================================================== */
 /*  SCREEN COMPONENT                                                    */
@@ -157,7 +184,11 @@ export default function DashboardScreen({ navigation }) {
         <Text style={styles.slideTitle}>{item.title}</Text>
         <Text style={styles.slideSubtitle}>{item.subtitle}</Text>
 
-        <TouchableOpacity style={styles.slideButton} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.slideButton}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('Catolog')}
+        >
           <Text style={styles.slideButtonText}>{item.buttonText}</Text>
           <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
         </TouchableOpacity>
@@ -201,65 +232,177 @@ export default function DashboardScreen({ navigation }) {
     </View>
   );
 
-  /* ---------- Quick Order Guides section ---------- */
-  const QuickOrderGuides = () => (
-    <View style={styles.card}>
-      {/* Section header row */}
-      <View style={styles.sectionHeaderRow}>
-        <View style={[styles.sectionIconWrap, { backgroundColor: '#D1FAE5' }]}>
-          <BookOpen size={18} color="#059669" />
+  /* ---------- Order Overview Dashboard — derived from recentOrders ---------- */
+  const OrderOverview = () => {
+    const totalOrders = recentOrders.length;
+    const deliveredCount = recentOrders.filter(
+      o => o.status === 'Delivered',
+    ).length;
+    const sentCount = recentOrders.filter(o => o.status === 'Sent').length;
+    const cancelledCount = recentOrders.filter(
+      o => o.status === 'Cancelled',
+    ).length;
+
+    const totalRevenue = recentOrders.reduce(
+      (s, o) => s + parseDollar(o.amount),
+      0,
+    );
+    const deliveredRev = recentOrders
+      .filter(o => o.status === 'Delivered')
+      .reduce((s, o) => s + parseDollar(o.amount), 0);
+    const sentRev = recentOrders
+      .filter(o => o.status === 'Sent')
+      .reduce((s, o) => s + parseDollar(o.amount), 0);
+    const cancelledRev = recentOrders
+      .filter(o => o.status === 'Cancelled')
+      .reduce((s, o) => s + parseDollar(o.amount), 0);
+
+    const pct = v => (totalRevenue > 0 ? v / totalRevenue : 0);
+
+    const stats = [
+      {
+        label: 'Total Orders',
+        value: String(totalOrders),
+        sub: 'All time',
+        icon: <Package size={16} color="#2e86de" />,
+        iconBg: '#EFF6FF',
+      },
+      {
+        label: 'Delivered',
+        value: String(deliveredCount),
+        sub: 'Successfully',
+        icon: <CheckCircle size={16} color="#16A34A" />,
+        iconBg: '#D1FAE5',
+      },
+      {
+        label: 'Order Sent',
+        value: String(sentCount),
+        sub: 'In transit',
+        icon: <Send size={16} color="#D97706" />,
+        iconBg: '#FEF3C7',
+      },
+      {
+        label: 'Cancelled',
+        value: String(cancelledCount),
+        sub: 'This month',
+        icon: <XCircle size={16} color="#EF4444" />,
+        iconBg: '#FEE2E2',
+      },
+    ];
+
+    const revenueBreakdown = [
+      {
+        label: 'Delivered',
+        amount: `$${deliveredRev.toFixed(2)}`,
+        pct: pct(deliveredRev),
+        color: '#16A34A',
+        trackColor: '#D1FAE5',
+      },
+      {
+        label: 'In Transit',
+        amount: `$${sentRev.toFixed(2)}`,
+        pct: pct(sentRev),
+        color: '#2e86de',
+        trackColor: '#EFF6FF',
+      },
+      {
+        label: 'Cancelled',
+        amount: `$${cancelledRev.toFixed(2)}`,
+        pct: pct(cancelledRev),
+        color: '#EF4444',
+        trackColor: '#FEE2E2',
+      },
+    ];
+
+    return (
+      <View style={styles.overviewContainer}>
+        {/* Section header */}
+        <View style={styles.overviewHeader}>
+          <View
+            style={[styles.overviewIconBox, { backgroundColor: '#EFF6FF' }]}
+          >
+            <TrendingUp size={18} color="#2e86de" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={styles.overviewTitle}>Order Overview</Text>
+            <Text style={styles.overviewSubtitle}>This month's summary</Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Orders')}
+          >
+            <Text style={styles.viewAllLink}>View all</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.sectionHeaderTextWrap}>
-          <Text style={styles.sectionTitle}>Quick Order Guides</Text>
-          <Text style={styles.sectionSubtitle}>
-            Select guides to add their products
-          </Text>
+        {/* 4 stat cards grid */}
+        <View style={styles.statsGrid}>
+          {stats.map((s, i) => (
+            <View key={i} style={styles.statCard}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: 20,
+                }}
+              >
+                <View
+                  style={[styles.statIconWrap, { backgroundColor: s.iconBg }]}
+                >
+                  {s.icon}
+                </View>
+                <View>
+                  <Text style={styles.statValue}>{s.value}</Text>
+                  <Text style={styles.statLabel}>{s.label}</Text>
+                  <Text style={styles.statSub}>{s.sub}</Text>
+                </View>
+              </View>
+            </View>
+          ))}
         </View>
 
-        <TouchableOpacity style={styles.chevronButton} activeOpacity={0.7}>
-          <ChevronRight size={18} color="#6B7280" />
-        </TouchableOpacity>
-      </View>
+        {/* Revenue breakdown */}
+        <View style={styles.revenueCard}>
+          <View style={styles.revTopRow}>
+            <View style={[styles.revIconBox, { backgroundColor: '#F0FDF4' }]}>
+              <DollarSign size={15} color="#16A34A" />
+            </View>
+            <View style={{ marginLeft: 8 }}>
+              <Text style={styles.revLabel}>Total Revenue</Text>
+              <Text style={styles.revValue}>${totalRevenue.toFixed(2)}</Text>
+            </View>
+          </View>
 
-      {/* Empty state */}
-      <View style={styles.emptyStateWrap}>
-        <View style={styles.emptyIconCircle}>
-          <BookOpen size={26} color="#2564eb75" />
+          <View style={styles.divider} />
+
+          {revenueBreakdown.map((r, i) => (
+            <View key={i} style={styles.barRow}>
+              <Text style={styles.barLabel}>{r.label}</Text>
+              <View
+                style={[styles.barTrack, { backgroundColor: r.trackColor }]}
+              >
+                <View
+                  style={[
+                    styles.barFill,
+                    {
+                      width: `${Math.round(r.pct * 100)}%`,
+                      backgroundColor: r.color,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.barAmount, { color: r.color }]}>
+                {r.amount}
+              </Text>
+            </View>
+          ))}
         </View>
-        <Text style={styles.emptyTitle}>No Order Guides Yet</Text>
-        <Text style={styles.emptySubtitle}>
-          Create a reusable guide for{'\n'}products you order regularly.
-        </Text>
       </View>
+    );
+  };
 
-      {/* Bottom action row */}
-      <View style={styles.guideActionRow}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{
-            borderColor: 'black',
-            borderWidth: 1,
-            borderColor: '#16A34A',
-            borderRadius: 20,
-            backgroundColor: '#16A34A',
-          }}
-        >
-          <Text style={styles.selectAllText}>Select all</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.addToCartButton} activeOpacity={0.85}>
-          <ShoppingCart size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={styles.addToCartText}>Add to cart</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  /* ---------- Recent Orders section — NEW CARD STYLE ---------- */
+  /* ---------- Recent Orders section ---------- */
   const RecentOrders = () => (
     <View style={styles.recentOrdersSection}>
-      {/* Section title row */}
       <View style={styles.recentOrdersTopRow}>
         <View style={styles.recentOrdersTitleLeft}>
           <View
@@ -274,43 +417,46 @@ export default function DashboardScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Order cards */}
-      {recentOrders.map((order, index) => (
-        <TouchableOpacity
-          key={order.id}
-          style={[
-            styles.orderCard,
-            index < recentOrders.length - 1 && styles.orderCardBorder,
-          ]}
-          activeOpacity={0.7}
-        >
-          {/* Thumbnail */}
-          <Image
-            source={{ uri: order.image }}
-            style={styles.orderThumb}
-            resizeMode="cover"
-          />
+      {recentOrders.map((order, index) => {
+        const badge = getStatusBadge(order.status);
+        return (
+          <TouchableOpacity
+            key={order.id}
+            style={[
+              styles.orderCard,
+              index < recentOrders.length - 1 && styles.orderCardBorder,
+            ]}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={{ uri: order.image }}
+              style={styles.orderThumb}
+              resizeMode="cover"
+            />
 
-          {/* Middle info */}
-          <View style={styles.orderCardInfo}>
-            <View style={styles.orderCardTopRow}>
-              <Text style={styles.orderCardId}>Order #{order.id}</Text>
-              <View style={styles.deliveredBadge}>
-                <Text style={styles.deliveredBadgeText}>{order.status}</Text>
+            <View style={styles.orderCardInfo}>
+              <View style={styles.orderCardTopRow}>
+                <Text style={styles.orderCardId}>Order #{order.id}</Text>
+                <View
+                  style={[styles.statusBadge, { backgroundColor: badge.bg }]}
+                >
+                  <Text style={[styles.statusBadgeText, { color: badge.text }]}>
+                    {order.status}
+                  </Text>
+                </View>
               </View>
+              <Text style={styles.orderCardMeta}>
+                {order.date} · {order.items} Items
+              </Text>
             </View>
-            <Text style={styles.orderCardMeta}>
-              {order.date} · {order.items} Items
-            </Text>
-          </View>
 
-          {/* Right: price + chevron */}
-          <View style={styles.orderCardRight}>
-            <Text style={styles.orderCardAmount}>{order.amount}</Text>
-            <ChevronRight size={16} color="#9CA3AF" />
-          </View>
-        </TouchableOpacity>
-      ))}
+            <View style={styles.orderCardRight}>
+              <Text style={styles.orderCardAmount}>{order.amount}</Text>
+              <ChevronRight size={16} color="#9CA3AF" />
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 
@@ -328,7 +474,7 @@ export default function DashboardScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <HeroSlider />
-        <QuickOrderGuides />
+        <OrderOverview />
         <RecentOrders />
       </ScrollView>
       <CustomBottomTab
@@ -347,6 +493,10 @@ export default function DashboardScreen({ navigation }) {
 
             case 'Cart':
               navigation.navigate('Catolog');
+              break;
+
+            case 'Orders':
+              navigation.navigate('Orders');
               break;
 
             case 'Profile':
@@ -376,11 +526,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: H_PADDING,
-    paddingTop: 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#F1F2F4',
-    marginTop: 18,
   },
   menuButton: {
     width: 34,
@@ -444,229 +592,228 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  /* Hero slider */
+  /* ── Hero slider (reduced height) ──────────────────────────── */
   heroCard: {
     marginHorizontal: H_PADDING,
-    marginTop: 16,
-    borderRadius: 20,
+    marginTop: 14,
+    borderRadius: 18,
     backgroundColor: '#ecf0f1',
     borderWidth: 1,
     borderColor: '#F1F2F4',
     overflow: 'hidden',
-    paddingBottom: 14,
+    paddingBottom: 10,
   },
   slide: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 10,
   },
   slideTextWrap: {
     flex: 1,
-    paddingLeft: 18,
-    paddingRight: 8,
+    paddingLeft: 16,
+    paddingRight: 6,
   },
   slideEyebrow: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#16A34A',
     letterSpacing: 0.5,
-    marginBottom: 8,
+    marginBottom: 5,
   },
   slideTitle: {
-    fontSize: 15,
+    fontSize: 13 /* was 15 */,
     fontWeight: '700',
     color: '#111827',
-    lineHeight: 26,
-    marginBottom: 8,
+    lineHeight: 20,
+    marginBottom: 5,
   },
   slideSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6B7280',
-    marginBottom: 16,
-    lineHeight: 18,
+    marginBottom: 12,
+    lineHeight: 16,
   },
   slideButton: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     backgroundColor: '#2e86de',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 24,
+    paddingVertical: 7 /* was 10 */,
+    paddingHorizontal: 13,
+    borderRadius: 20,
   },
   slideButtonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 11,
+    fontSize: 10,
   },
   slideImage: {
-    width: '42%',
-    height: 165,
-    borderRadius: 14,
-    marginRight: 14,
+    width: '40%',
+    height: 130 /* was 165 */,
+    borderRadius: 12,
+    marginRight: 12,
   },
   dotsWrap: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
   },
   dot: {
-    height: 6,
+    height: 5,
     borderRadius: 3,
     marginHorizontal: 3,
   },
   dotActive: {
-    width: 18,
+    width: 16,
     backgroundColor: '#2e86de',
   },
   dotInactive: {
-    width: 6,
+    width: 5,
     backgroundColor: 'black',
   },
 
-  /* Quick actions grid */
-  actionsGrid: {
+  /* ── Order Overview Dashboard ───────────────────────────────── */
+  overviewContainer: {
+    marginHorizontal: H_PADDING,
+    marginTop: 14,
+    marginBottom: 4,
+  },
+  overviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  overviewIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overviewTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  overviewSubtitle: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginTop: 1,
+  },
+  viewAllLink: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2e86de',
+  },
+
+  /* 2×2 stat grid — reduced */
+  statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: H_PADDING,
-    marginTop: 16,
+    gap: 8,
+    marginBottom: 10,
   },
-  actionCard: {
+  statCard: {
     width: '48.5%',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#F1F2F4',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
+    borderRadius: 14,
+    padding: 10 /* was 14 */,
+    paddingTop: -5,
   },
-  actionIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  statIconWrap: {
+    width: 28 /* was 34 */,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+
+    marginTop: '20',
   },
-  actionTitle: {
-    fontSize: 14,
+  statValue: {
+    fontSize: 18 /* was 26 */,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 2,
+    marginBottom: 1,
   },
-  actionSubtitle: {
-    fontSize: 12,
+  statLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  statSub: {
+    fontSize: 10,
     color: '#9CA3AF',
+    marginTop: 1,
   },
 
-  /* Generic card / section header */
-  card: {
-    marginHorizontal: H_PADDING,
-    marginTop: 4,
-    marginBottom: 4,
+  /* Revenue breakdown card — reduced */
+  revenueCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#F1F2F4',
-    borderRadius: 18,
-    padding: 16,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  sectionHeaderTextWrap: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
-  chevronButton: {
-    width: 28,
-    height: 28,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    padding: 13 /* was 16 */,
+  },
+  revTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  revIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  /* Quick Order Guides – empty state */
-  emptyStateWrap: {
-    alignItems: 'center',
-    paddingVertical: 5,
+  revLabel: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
-  emptyIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-  emptyTitle: {
-    fontSize: 15,
+  revValue: {
+    fontSize: 19 /* was 22 */,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 6,
   },
-  emptySubtitle: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    lineHeight: 19,
+  divider: {
+    height: 1,
+    backgroundColor: '#F1F2F4',
+    marginBottom: 10,
   },
-
-  /* Quick Order Guides – bottom action row */
-  guideActionRow: {
+  barRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#F1F2F4',
-    paddingTop: 14,
-    marginTop: 4,
+    marginBottom: 8,
   },
-  selectAllText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
+  barLabel: {
+    fontSize: 11,
+    color: '#6B7280',
+    width: 64,
   },
-  addToCartButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2564eb75',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 24,
+  barTrack: {
+    flex: 1,
+    height: 7,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginHorizontal: 8,
   },
-  addToCartText: {
-    color: '#FFFFFF',
+  barFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  barAmount: {
+    fontSize: 11,
     fontWeight: '700',
-    fontSize: 14,
+    width: 62,
+    textAlign: 'right',
   },
 
-  /* ── Recent Orders — NEW CARD STYLE ─────────────────────── */
+  /* ── Recent Orders ─────────────────────────────────────────── */
   recentOrdersSection: {
     marginHorizontal: H_PADDING,
     marginTop: 12,
@@ -702,13 +849,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111827',
   },
-  viewAllLink: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2e86de',
-  },
 
-  /* Individual order card row */
   orderCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -739,16 +880,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111827',
   },
-  deliveredBadge: {
-    backgroundColor: '#D1FAE5',
+  statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 20,
   },
-  deliveredBadgeText: {
+  statusBadgeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#059669',
   },
   orderCardMeta: {
     fontSize: 11,

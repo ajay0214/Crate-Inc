@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Animated,
   Dimensions,
@@ -16,6 +15,7 @@ import {
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 

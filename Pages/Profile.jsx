@@ -1,516 +1,364 @@
-import React, { useState } from 'react'; import {
-    View,
-    Text,
-    StyleSheet,
-    SafeAreaView,
-    TouchableOpacity,
-    ScrollView,
-    StatusBar, Image, ImageBackground
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  TextInput,
+  Platform,
+  KeyboardAvoidingView,
+  Image,
 } from 'react-native';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomBottomTab from './CustomBottomTab';
 
-const COLORS = {
-    gradientStart: '#FF7043',
-    gradientEnd: '#F5A623',
-    primary: '#FF7043',
-    primaryLight: '#FFF0E0',
-    background: '#FFF8F0',
-    white: '#FFFFFF',
-    text: '#1C1C1E',
-    subText: '#8E8E93',
-    border: '#F0E6D6',
-    danger: '#FF3B30',
-    success: '#4CAF50',
-    blue: '#1976D2',
-    blueLight: '#E3F2FD',
-    purple: '#9C27B0',
-    purpleLight: '#F3E5F5',
-    deepPurple: '#673AB7',
-    deepPurpleLight: '#EDE7F6',
-    green: '#388E3C',
-    greenLight: '#E8F5E9',
-    amber: '#F9A825',
-    amberLight: '#FFF8E1',
-};
+import {
+  Menu,
+  MoreVertical,
+  Paperclip,
+  Camera,
+  Send,
+} from 'lucide-react-native';
 
-const menuSections = [
-    {
-        label: 'Activity',
-        items: [
-            {
-                title: 'My Orders',
-                subtitle: 'Track your recent purchases',
-                icon: require('../Assets/order.png'),
-                iconBg: COLORS.amberLight,
-                badge: '2 New',
-                badgeColor: COLORS.danger,
-                screen: 'Orders',
-            },
-            {
-                title: 'Wishlist',
-                subtitle: '8 items saved',
-                icon: require('../Assets/heart.png'),
-                iconBg: COLORS.amberLight,
-                screen: 'Wishlist',
-            },
-        ],
-    },
-    {
-        label: 'Account',
-        items: [
-            {
-                title: 'Manage Addresses',
-                subtitle: 'Manage saved addresses',
-                icon: require('../Assets/location.png'),
-                iconBg: COLORS.amberLight,
-                screen: 'Address',
-            },
-            {
-                title: 'Payment Methods',
-                subtitle: 'Cards & UPI linked',
-                icon: require('../Assets/payment.png'),
-                iconBg: COLORS.amberLight,
-                screen: 'Payment',
-            },
-            {
-                title: 'Coupons & Offers',
-                subtitle: '12 coupons available',
-                icon: require('../Assets/coupon.png'),
-                iconBg: COLORS.amberLight,
-                badge: '12',
-                badgeColor: COLORS.gradientEnd,
-                screen: 'Coupons',
-            },
-        ],
-    },
-    {
-        label: 'Preferences',
-        items: [
-            {
-                title: 'Notifications',
-                subtitle: 'Push, email & SMS alerts',
-                icon: require('../Assets/bell.png'),
-                iconBg: COLORS.amberLight,
-                screen: 'Notifications',
-            },
-            {
-                title: 'Help & Support',
-                subtitle: 'FAQs, chat with us',
-                icon: require('../Assets/secure.png'),
-                iconBg: COLORS.amberLight,
-                screen: 'Help',
-            },
-            {
-                title: 'Settings',
-                subtitle: 'App preferences & privacy',
-                icon: require('../Assets/settings.png'),
-                iconBg: COLORS.amberLight,
-                screen: 'Settings',
-            },
-        ],
-    },
+// ─── Mock Messages ───────────────────────────────────────────────────────────
+const MESSAGES = [
+  {
+    id: '1',
+    name: 'Samuel Ponraj',
+    role: 'Store Manager',
+    avatar: '🧔🏾',
+    text: 'Hi Rama',
+    time: 'Jun 18 - 12:59 PM',
+    dateGroup: 'Jun 18',
+  },
+  {
+    id: '2',
+    name: 'Neela Krishnan',
+    role: 'Store Employee',
+    avatar: '👩🏾',
+    text: 'hello',
+    time: 'Jun 18 - 1:00 PM',
+    dateGroup: 'Jun 18',
+  },
 ];
 
-export default function Profile({ navigation }) {
-
-    const [activeTab, setActiveTab] = useState('Profile');
-
-    const [cartCount, setCartCount] = useState(3);
-
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={COLORS.gradientStart} />
-
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 120 }}
-            >
-                {/* Orange gradient background behind header + avatar */}
-                <ImageBackground
-                    source={require('../Assets/Grocery.png')}
-                    style={styles.heroBg}
-                    imageStyle={styles.heroBgImage}
-                >
-                    <View style={styles.heroOverlay} />
-                </ImageBackground>
-                {/* Header Row */}
-                <View style={styles.header}>
-                    <View style={{ width: 38 }} />
-
-                    <TouchableOpacity style={styles.notifBtn}>
-                        <Image
-                            source={require('../Assets/bell.png')}
-                            style={{
-                                width: 20,
-                                height: 20,
-                                tintColor: '#fff',
-                            }}
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Avatar & User Info */}
-                <View style={styles.profileSection}>
-                    <View style={styles.avatarWrap}>
-                        <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>AK</Text>
-                        </View>
-                        <View style={styles.editIconWrap}>
-                            <Image
-                                source={require('../Assets/edit.png')}
-                                style={{
-                                    width: 12,
-                                    height: 12,
-                                    tintColor: '#fff',
-                                }}
-                            />
-                        </View>
-                    </View>
-
-                    <Text style={styles.userName}>Ajay Kumar</Text>
-                    <Text style={styles.userEmail}>ajay@gmail.com</Text>
-                    <Text style={styles.userPhone}>+91 98765 43210</Text>
-
-                    <TouchableOpacity style={styles.editBtn} activeOpacity={0.85}>
-                        <Text style={styles.editBtnText}>Edit Profile</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Stats Row */}
-
-
-                {/* Menu Sections */}
-                {menuSections.map((section, si) => (
-                    <View key={si}>
-                        <Text style={styles.sectionLabel}>{section.label}</Text>
-                        <View style={styles.menuCard}>
-                            {section.items.map((item, ii) => (
-                                <TouchableOpacity
-                                    key={ii}
-                                    style={[
-                                        styles.menuItem,
-                                        ii < section.items.length - 1 && styles.menuItemBorder,
-                                    ]}
-                                    activeOpacity={0.75}
-                                    onPress={() => navigation.navigate(item.screen)}
-                                >
-                                    <View style={[styles.menuIconWrap, { backgroundColor: item.iconBg }]}>
-                                        <Image
-                                            source={item.icon}
-                                            style={styles.menuIcon}
-                                            resizeMode="contain"
-                                        />
-                                    </View>
-
-                                    <View style={styles.menuTextWrap}>
-                                        <Text style={styles.menuTitle}>{item.title}</Text>
-                                        <Text style={styles.menuSub}>{item.subtitle}</Text>
-                                    </View>
-
-                                    {item.badge && (
-                                        <View style={[styles.badge, { backgroundColor: item.badgeColor }]}>
-                                            <Text style={styles.badgeText}>{item.badge}</Text>
-                                        </View>
-                                    )}
-
-                                    <Text style={styles.arrow}>›</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
-                ))}
-
-                {/* Logout Button */}
-                <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.85}>
-                    <Text style={styles.logoutText}>Logout</Text>
-                </TouchableOpacity>
-            </ScrollView>
-
-            <CustomBottomTab
-                activeTab="Profile"
-                cartCount={cartCount}
-                onTabPress={(tab) => {
-                    setActiveTab(tab);
-                    switch (tab) {
-                        case 'Home':
-                            navigation.navigate('Dashboard');
-                            break;
-                        case 'Category':
-                            navigation.navigate('CategoryList');
-                            break;
-                        case 'Cart':
-                            navigation.navigate('CartScreen');
-                            break;
-                        case 'Profile':
-                            navigation.navigate('Profile');
-                            break;
-                    }
-                }}
-            />
-        </SafeAreaView>
-    );
+// ─── Avatar circle with emoji ─────────────────────────────────────────────
+function AvatarEmoji({ emoji }) {
+  return (
+    <View style={st.avatarWrap}>
+      <Text style={st.avatarEmoji}>{emoji}</Text>
+    </View>
+  );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
+// ─── Date Separator ──────────────────────────────────────────────────────────
+function DateSeparator({ label }) {
+  return (
+    <View style={st.dateSepWrap}>
+      <Text style={st.dateSepTxt}>{label}</Text>
+    </View>
+  );
+}
 
-    /* Hero orange background */
-    heroBg: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 240,
-    },
-    heroBgImage: {
-        borderBottomLeftRadius: 40,
-        borderBottomRightRadius: 40,
-    },
+// ─── Message Bubble ──────────────────────────────────────────────────────────
+function MessageBubble({ msg }) {
+  return (
+    <View style={st.bubbleRow}>
+      <AvatarEmoji emoji={msg.avatar} />
+      <View style={st.bubble}>
+        {/* Name + Role */}
+        <View style={st.bubbleHeader}>
+          <Text style={st.bubbleName}>{msg.name}</Text>
+          <Text style={st.bubbleRole}> ~ {msg.role}</Text>
+        </View>
+        {/* Message text */}
+        <Text style={st.bubbleText}>{msg.text}</Text>
+        {/* Timestamp */}
+        <Text style={st.bubbleTime}>{msg.time}</Text>
+      </View>
+    </View>
+  );
+}
 
-    /* Header */
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 16,
-        paddingBottom: 4,
+// ─── Main Screen ─────────────────────────────────────────────────────────────
+export default function MessagesScreen({ navigation }) {
+  const [input, setInput] = useState('');
+  const scrollRef = useRef(null);
 
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: COLORS.white,
-    },
-    notifBtn: {
-        width: 38,
-        height: 38,
-        backgroundColor: 'rgba(255,255,255,0.25)',
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+  const [activeTab, setActiveTab] = useState('Profile');
 
-    /* Profile Section */
-    profileSection: {
-        alignItems: 'center',
-        paddingTop: 1,
-    },
-    avatarWrap: {
-        position: 'relative',
-    },
-    avatar: {
-        width: 78,
-        height: 78,
-        borderRadius: 44,
-        backgroundColor: COLORS.gradientEnd,
-        borderWidth: 4,
-        borderColor: COLORS.gradientEnd,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 10,
-        elevation: 8,
-    },
-    heroOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        borderBottomLeftRadius: 40,
-        borderBottomRightRadius: 40,
-    },
-    avatarText: {
-        fontSize: 28,
-        fontWeight: '900',
-        color: COLORS.white,
-    },
-    editIconWrap: {
-        position: 'absolute',
-        bottom: 0,
-        right: -2,
-        width: 26,
-        height: 26,
-        backgroundColor: COLORS.gradientEnd,
-        borderRadius: 13,
-        borderWidth: 2.5,
-        borderColor: COLORS.white,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    userName: {
-        fontSize: 21,
-        fontWeight: '900',
-        color: COLORS.gradientEnd,
-        marginTop: 14,
-    },
-    userEmail: {
-        fontSize: 13,
-        color: COLORS.white,
-        fontWeight: '600',
-        marginTop: 3,
-    },
-    menuIcon: {
-        width: 22,
-        height: 22,
-        tintColor: COLORS.gradientEnd
-    },
-    userPhone: {
-        fontSize: 13,
-        color: COLORS.white,
-        fontWeight: '600',
-        marginTop: 2,
-    },
-    editBtn: {
-        marginTop: 14,
-        backgroundColor: COLORS.gradientEnd,
-        paddingHorizontal: 32,
-        paddingVertical: 11,
-        borderRadius: 20,
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    editBtnText: {
-        color: COLORS.white,
-        fontWeight: '800',
-        fontSize: 14,
-        letterSpacing: 0.3,
-    },
+  // Group messages by date
+  const dateGroups = [];
+  const seen = new Set();
+  MESSAGES.forEach(m => {
+    if (!seen.has(m.dateGroup)) {
+      seen.add(m.dateGroup);
+      dateGroups.push(m.dateGroup);
+    }
+  });
 
-    /* Stats */
-    statsRow: {
-        flexDirection: 'row',
-        gap: 10,
-        paddingHorizontal: 16,
-        marginTop: 20,
-    },
-    statCard: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        borderRadius: 18,
-        paddingVertical: 18,
-        paddingHorizontal: 10,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    statNum: {
-        fontSize: 22,
-        fontWeight: '900',
-        color: COLORS.primary,
-    },
-    statLabel: {
-        fontSize: 11,
-        color: COLORS.subText,
-        fontWeight: '700',
-        marginTop: 3,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-    },
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
+      <SafeAreaView style={st.safe} edges={['top']}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-    /* Section label */
-    sectionLabel: {
-        fontSize: 12,
-        fontWeight: '800',
-        color: COLORS.subText,
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 8,
-    },
+        {/* ── Header ── */}
+        <View style={st.header}>
+          {/* Left: hamburger + title */}
+          <TouchableOpacity style={st.menuBtn} activeOpacity={0.7}>
+            <Menu size={22} color="#111827" />
+          </TouchableOpacity>
+          <View style={st.headerCenter}>
+            <Text style={st.headerTitle}>Messages</Text>
+            <Text style={st.headerSub}>View customer and team messages</Text>
+          </View>
+          {/* Right: 3-dot + avatar */}
+          <View style={st.headerRight}>
+            <TouchableOpacity style={st.dotBtn} activeOpacity={0.7}>
+              <MoreVertical size={20} color="#6B7280" />
+            </TouchableOpacity>
+            <View style={st.avatar}>
+              <Text style={st.avatarTxt}>AV</Text>
+            </View>
+          </View>
+        </View>
 
-    /* Menu card */
-    menuCard: {
-        marginHorizontal: 16,
-        backgroundColor: COLORS.white,
-        borderRadius: 20,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 3,
-    },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-    },
-    menuItemBorder: {
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
-    },
-    menuIconWrap: {
-        width: 42,
-        height: 42,
-        borderRadius: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 14,
-    },
-    menuTextWrap: {
-        flex: 1,
-    },
-    menuTitle: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: COLORS.text,
-    },
-    menuSub: {
-        fontSize: 12,
-        color: COLORS.subText,
-        fontWeight: '600',
-        marginTop: 2,
-    },
-    badge: {
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 10,
-        marginRight: 8,
-    },
-    badgeText: {
-        color: COLORS.white,
-        fontSize: 11,
-        fontWeight: '800',
-    },
-    arrow: {
-        fontSize: 22,
-        color: COLORS.subText,
-        fontWeight: '300',
-    },
+        {/* ── Messages List ── */}
+        <ScrollView
+          ref={scrollRef}
+          style={st.msgList}
+          contentContainerStyle={st.msgListContent}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={() =>
+            scrollRef.current?.scrollToEnd({ animated: false })
+          }
+        >
+          {dateGroups.map(dateGroup => (
+            <View key={dateGroup}>
+              <DateSeparator label={dateGroup} />
+              {MESSAGES.filter(m => m.dateGroup === dateGroup).map(msg => (
+                <MessageBubble key={msg.id} msg={msg} />
+              ))}
+            </View>
+          ))}
+        </ScrollView>
 
-    /* Logout */
-    logoutBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: COLORS.gradientEnd,
-        marginHorizontal: 16,
-        marginTop: 24,
-        borderRadius: 16,
-        paddingVertical: 16,
-        shadowColor: COLORS.danger,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    logoutText: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: '800',
-    },
+        {/* ── Input Bar ── */}
+        <SafeAreaView edges={['bottom']} style={st.inputSafeArea}>
+          <View style={st.inputBar}>
+            {/* Paperclip */}
+            <TouchableOpacity style={st.inputIcon} activeOpacity={0.7}>
+              <Paperclip size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            {/* Text input */}
+            <TextInput
+              style={st.textInput}
+              placeholder="Write a message..."
+              placeholderTextColor="#9CA3AF"
+              value={input}
+              onChangeText={setInput}
+              multiline
+              returnKeyType="default"
+            />
+
+            {/* Camera */}
+            <TouchableOpacity style={st.inputIcon} activeOpacity={0.7}>
+              <Camera size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            {/* Send button */}
+            <TouchableOpacity style={st.sendBtn} activeOpacity={0.85}>
+              <Send size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+
+        <CustomBottomTab
+          activeTab="Profile"
+          onTabPress={tab => {
+            setActiveTab(tab);
+            switch (tab) {
+              case 'Home':
+                navigation.navigate('Dashboard');
+                break;
+              case 'Category':
+                navigation.navigate('OrderGuide');
+                break;
+              case 'Cart':
+                navigation.navigate('Catolog');
+                break;
+              case 'Orders':
+                navigation.navigate('Orders');
+                break;
+
+              case 'Profile':
+                navigation.navigate('Profile');
+                break;
+            }
+          }}
+        />
+      </SafeAreaView>
+    </KeyboardAvoidingView>
+  );
+}
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+const st = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#fff' },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f2f4',
+    backgroundColor: '#fff',
+  },
+  menuBtn: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCenter: { flex: 1, marginLeft: 8 },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
+  headerSub: { fontSize: 11.5, color: '#9CA3AF', marginTop: 1 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  dotBtn: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarTxt: { fontSize: 12, fontWeight: '700', color: '#374151' },
+
+  // Messages list
+  msgList: { flex: 1, backgroundColor: '#fff' },
+  msgListContent: {
+    paddingHorizontal: 14,
+    paddingTop: 24,
+    paddingBottom: 12,
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+  },
+
+  // Date separator
+  dateSepWrap: {
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  dateSepTxt: {
+    fontSize: 12.5,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+
+  // Message bubble
+  bubbleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  avatarWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    marginTop: 2,
+  },
+  avatarEmoji: { fontSize: 22 },
+
+  bubble: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    borderTopLeftRadius: 4,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  bubbleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 5,
+  },
+  bubbleName: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  bubbleRole: {
+    fontSize: 11.5,
+    color: '#2e86de',
+    fontWeight: '500',
+  },
+  bubbleText: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+    marginBottom: 6,
+  },
+  bubbleTime: {
+    fontSize: 11,
+    color: '#2e86de',
+    textAlign: 'right',
+    fontWeight: '500',
+  },
+
+  // Input bar
+  inputSafeArea: { backgroundColor: '#fff' },
+  inputBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f2f4',
+    backgroundColor: '#fff',
+    gap: 6,
+  },
+  inputIcon: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#111827',
+    paddingVertical: Platform.OS === 'ios' ? 8 : 6,
+    paddingHorizontal: 4,
+    maxHeight: 100,
+  },
+  sendBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#2e86de',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
