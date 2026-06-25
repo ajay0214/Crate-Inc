@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Dimensions,
   StatusBar,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -24,6 +26,7 @@ import {
   TrendingUp,
   ChevronLeft,
   ArrowLeft,
+  X,
 } from 'lucide-react-native';
 import CustomBottomTab from './CustomBottomTab';
 
@@ -119,10 +122,164 @@ const getStatusBadge = status => {
 };
 
 /* ================================================================== */
+/*  CART MODAL COMPONENT                                                */
+/* ================================================================== */
+
+const CartModal = ({ visible, onClose }) => {
+  // Cart items would come from your cart state/context in a real app
+  const cartItems = [];
+  const total = 0.0;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={cartStyles.overlay} />
+      </TouchableWithoutFeedback>
+
+      <View style={cartStyles.sheet}>
+        {/* Header */}
+        <View style={cartStyles.header}>
+          <Text style={cartStyles.headerTitle}>
+            Your Cart ({cartItems.length} items)
+          </Text>
+          <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={cartStyles.closeBtn}>
+            <X size={20} color="#374151" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={cartStyles.divider} />
+
+        {/* Empty state */}
+        {cartItems.length === 0 ? (
+          <View style={cartStyles.emptyWrap}>
+            <ShoppingCart size={48} color="#D1D5DB" strokeWidth={1.5} />
+            <Text style={cartStyles.emptyText}>Your cart is empty</Text>
+          </View>
+        ) : (
+          <ScrollView style={cartStyles.itemsList} showsVerticalScrollIndicator={false}>
+            {/* Cart items would be rendered here */}
+          </ScrollView>
+        )}
+
+        {/* Footer */}
+        <View style={cartStyles.footer}>
+          <View style={cartStyles.totalRow}>
+            <Text style={cartStyles.totalLabel}>Total</Text>
+            <Text style={cartStyles.totalValue}>${total.toFixed(2)}</Text>
+          </View>
+          <TouchableOpacity style={cartStyles.checkoutBtn} activeOpacity={0.85}>
+            <Text style={cartStyles.checkoutBtnText}>Proceed to Checkout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const cartStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    minHeight: '100%',
+    flexDirection: 'column',
+    justifyContent: 'space-between'
+
+
+
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  closeBtn: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F1F2F4',
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  itemsList: {
+    paddingHorizontal: 20,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F2F4',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  totalLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  totalValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  checkoutBtn: {
+    backgroundColor: '#2e86de',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  checkoutBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+});
+
+/* ================================================================== */
 /*  SCREEN COMPONENT                                                    */
 /* ================================================================== */
 
 export default function DashboardScreen({ navigation }) {
+  const [cartVisible, setCartVisible] = useState(false);
+
   /* ---------- Header ---------- */
   const Header = () => (
     <View style={styles.header}>
@@ -142,7 +299,11 @@ export default function DashboardScreen({ navigation }) {
           <Text style={styles.avatarText}>AV</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.cartButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.cartButton}
+          activeOpacity={0.7}
+          onPress={() => setCartVisible(true)}
+        >
           <ShoppingCart size={20} color="#2e86de" />
           <View style={styles.cartBadge}>
             <Text style={styles.cartBadgeText}>0</Text>
@@ -462,6 +623,7 @@ export default function DashboardScreen({ navigation }) {
         <OrderOverview />
         <RecentOrders />
       </ScrollView>
+
       <CustomBottomTab
         activeTab="Home"
         onTabPress={tab => {
@@ -489,6 +651,12 @@ export default function DashboardScreen({ navigation }) {
               break;
           }
         }}
+      />
+
+      {/* Cart Modal */}
+      <CartModal
+        visible={cartVisible}
+        onClose={() => setCartVisible(false)}
       />
     </SafeAreaView>
   );

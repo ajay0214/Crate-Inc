@@ -1172,9 +1172,8 @@ export default function Catalog({ navigation }) {
 
   const formatDate = d =>
     `${SHORT_MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-  const cutoffDate = `8:00 AM ${
-    deliveryDate.getMonth() + 1
-  }/${deliveryDate.getDate()}`;
+  const cutoffDate = `8:00 AM ${deliveryDate.getMonth() + 1
+    }/${deliveryDate.getDate()}`;
 
   const loadOrderGuides = async () => {
     try {

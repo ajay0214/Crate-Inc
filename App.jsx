@@ -15,10 +15,14 @@ import Orders from './Pages/Orders';
 
 import CustomHeader from './Components/CustomHeader';
 
+
+
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
+
+
     <NavigationContainer>
       <Stack.Navigator initialRouteName="LoginScreen">
         <Stack.Screen
@@ -80,6 +84,7 @@ const App = () => {
         />
       </Stack.Navigator>
     </NavigationContainer>
+
   );
 };
 

@@ -8,6 +8,8 @@ import {
   StatusBar,
   Platform,
   Dimensions,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -19,6 +21,7 @@ import {
   Clock,
   DollarSign,
   SlidersHorizontal,
+  X,
 } from 'lucide-react-native';
 import CustomBottomTab from './CustomBottomTab';
 
@@ -76,6 +79,153 @@ function getStatusStyle(status) {
       return { bg: '#f3f4f6', text: '#6b7280' };
   }
 }
+
+// ─── Cart Modal ──────────────────────────────────────────────────────────────
+function CartModal({ visible, onClose }) {
+  const cartItems = [];
+  const total = 0.0;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={cartStyles.overlay} />
+      </TouchableWithoutFeedback>
+
+      <View style={cartStyles.sheet}>
+        {/* Header */}
+        <View style={cartStyles.header}>
+          <Text style={cartStyles.headerTitle}>
+            Your Cart ({cartItems.length} items)
+          </Text>
+          <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={cartStyles.closeBtn}>
+            <X size={20} color="#374151" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={cartStyles.divider} />
+
+        {/* Empty state */}
+        {cartItems.length === 0 ? (
+          <View style={cartStyles.emptyWrap}>
+            <ShoppingCart size={48} color="#D1D5DB" strokeWidth={1.5} />
+            <Text style={cartStyles.emptyText}>Your cart is empty</Text>
+          </View>
+        ) : (
+          <ScrollView style={cartStyles.itemsList} showsVerticalScrollIndicator={false}>
+            {/* Cart items would be rendered here */}
+          </ScrollView>
+        )}
+
+        {/* Footer */}
+        <View style={cartStyles.footer}>
+          <View style={cartStyles.totalRow}>
+            <Text style={cartStyles.totalLabel}>Total</Text>
+            <Text style={cartStyles.totalValue}>${total.toFixed(2)}</Text>
+          </View>
+          <TouchableOpacity style={cartStyles.checkoutBtn} activeOpacity={0.85}>
+            <Text style={cartStyles.checkoutBtnText}>Proceed to Checkout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const cartStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    paddingBottom: 32,
+    minHeight: '100%',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+
+
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  closeBtn: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F1F2F4',
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  itemsList: {
+    paddingHorizontal: 20,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F2F4',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  totalLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  totalValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  checkoutBtn: {
+    backgroundColor: '#2e86de',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  checkoutBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+});
 
 // ─── Stat Card ──────────────────────────────────────────────────────────────
 function StatCard({ iconBg, icon, value, label }) {
@@ -142,6 +292,8 @@ export default function MyOrders({ navigation }) {
   const [showOrderType, setShowOrderType] = useState(false);
   const [orderType, setOrderType] = useState('All');
 
+  const [cartVisible, setCartVisible] = useState(false);
+
   const tabs = ['All Orders', 'Upcoming', 'Past'];
   const filteredOrders = ORDERS.filter(order => {
     let matchesTab = true;
@@ -178,7 +330,11 @@ export default function MyOrders({ navigation }) {
             <View style={s.avatar}>
               <Text style={s.avatarTxt}>AV</Text>
             </View>
-            <TouchableOpacity style={s.cartWrap} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={s.cartWrap}
+              activeOpacity={0.8}
+              onPress={() => setCartVisible(true)}
+            >
               <ShoppingCart size={22} color="#2e86de" />
               <View style={s.cartBadge}>
                 <Text style={s.cartBadgeTxt}>16</Text>
@@ -240,8 +396,8 @@ export default function MyOrders({ navigation }) {
                       isActive
                         ? s.tabActive
                         : isPast
-                        ? s.tabPast
-                        : s.tabInactive,
+                          ? s.tabPast
+                          : s.tabInactive,
                     ]}
                     onPress={() => setActiveTab(tab)}
                     activeOpacity={0.8}
@@ -252,8 +408,8 @@ export default function MyOrders({ navigation }) {
                         isActive
                           ? s.tabTxtActive
                           : isPast
-                          ? s.tabTxtPast
-                          : s.tabTxtInactive,
+                            ? s.tabTxtPast
+                            : s.tabTxtInactive,
                       ]}
                     >
                       {tab}
@@ -293,7 +449,7 @@ export default function MyOrders({ navigation }) {
             {/* Order Cards */}
             <View style={s.orderList}>
               {filteredOrders.map(order => (
-                <OrderCard key={order.id} order={order} onPress={() => {}} />
+                <OrderCard key={order.id} order={order} onPress={() => { }} />
               ))}
             </View>
           </View>
@@ -325,6 +481,12 @@ export default function MyOrders({ navigation }) {
                 break;
             }
           }}
+        />
+
+        {/* Cart Modal */}
+        <CartModal
+          visible={cartVisible}
+          onClose={() => setCartVisible(false)}
         />
       </SafeAreaView>
     </View>
