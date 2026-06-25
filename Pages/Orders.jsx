@@ -137,17 +137,29 @@ function OrderCard({ order, onPress }) {
 // ─── Main Screen ────────────────────────────────────────────────────────────
 export default function MyOrders({ navigation }) {
   const [activeTab, setActiveTab] = useState('All Orders');
-  const [activeBottomTab, setActiveBottomTab] = useState('Home');
+  const [activeBottomTab, setActiveBottomTab] = useState('Orders');
+
+  const [showOrderType, setShowOrderType] = useState(false);
+  const [orderType, setOrderType] = useState('All');
 
   const tabs = ['All Orders', 'Upcoming', 'Past'];
-
   const filteredOrders = ORDERS.filter(order => {
-    if (activeTab === 'All Orders') return true;
-    if (activeTab === 'Upcoming') return order.status === 'Order Sent';
-    if (activeTab === 'Past') return order.status === 'Delivered';
-    return true;
-  });
+    let matchesTab = true;
 
+    if (activeTab === 'Upcoming') {
+      matchesTab = order.status === 'Order Sent';
+    } else if (activeTab === 'Past') {
+      matchesTab = order.status === 'Delivered';
+    }
+
+    let matchesOrderType = true;
+
+    if (orderType !== 'All') {
+      matchesOrderType = order.status === orderType;
+    }
+
+    return matchesTab && matchesOrderType;
+  });
   return (
     <View style={{ flex: 1 }}>
       <SafeAreaView style={s.safe}>
@@ -252,10 +264,31 @@ export default function MyOrders({ navigation }) {
             </View>
 
             {/* Order Type filter chip */}
-            <TouchableOpacity style={s.filterChip} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={s.filterChip}
+              activeOpacity={0.8}
+              onPress={() => setShowOrderType(!showOrderType)}
+            >
               <SlidersHorizontal size={15} color="#374151" />
-              <Text style={s.filterChipTxt}> Order Type</Text>
+              <Text style={s.filterChipTxt}> {orderType}</Text>
             </TouchableOpacity>
+
+            {showOrderType && (
+              <View style={s.orderTypeDropdown}>
+                {['All', 'Delivered', 'Order Sent', 'Cancelled'].map(item => (
+                  <TouchableOpacity
+                    key={item}
+                    style={s.orderTypeItem}
+                    onPress={() => {
+                      setOrderType(item);
+                      setShowOrderType(false);
+                    }}
+                  >
+                    <Text style={s.orderTypeItemText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
             {/* Order Cards */}
             <View style={s.orderList}>
@@ -274,12 +307,19 @@ export default function MyOrders({ navigation }) {
               case 'Home':
                 navigation.navigate('Dashboard');
                 break;
+
               case 'Category':
                 navigation.navigate('OrderGuide');
                 break;
+
               case 'Cart':
                 navigation.navigate('Catolog');
                 break;
+
+              case 'Orders':
+                navigation.navigate('Orders');
+                break;
+
               case 'Profile':
                 navigation.navigate('Profile');
                 break;
@@ -488,4 +528,24 @@ const s = StyleSheet.create({
   orderFooterCol: {},
   orderFooterLabel: { fontSize: 11.5, color: '#9CA3AF', marginBottom: 3 },
   orderFooterValue: { fontSize: 14, fontWeight: '700', color: '#111827' },
+  orderTypeDropdown: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 10,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+
+  orderTypeItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+
+  orderTypeItemText: {
+    fontSize: 14,
+    color: '#111827',
+  },
 });

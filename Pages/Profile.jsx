@@ -9,11 +9,9 @@ import {
   TextInput,
   Platform,
   KeyboardAvoidingView,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomBottomTab from './CustomBottomTab';
-
 import {
   Menu,
   MoreVertical,
@@ -22,8 +20,7 @@ import {
   Send,
 } from 'lucide-react-native';
 
-// ─── Mock Messages ───────────────────────────────────────────────────────────
-const MESSAGES = [
+const INITIAL_MESSAGES = [
   {
     id: '1',
     name: 'Samuel Ponraj',
@@ -44,7 +41,6 @@ const MESSAGES = [
   },
 ];
 
-// ─── Avatar circle with emoji ─────────────────────────────────────────────
 function AvatarEmoji({ emoji }) {
   return (
     <View style={st.avatarWrap}>
@@ -53,7 +49,6 @@ function AvatarEmoji({ emoji }) {
   );
 }
 
-// ─── Date Separator ──────────────────────────────────────────────────────────
 function DateSeparator({ label }) {
   return (
     <View style={st.dateSepWrap}>
@@ -62,37 +57,104 @@ function DateSeparator({ label }) {
   );
 }
 
-// ─── Message Bubble ──────────────────────────────────────────────────────────
 function MessageBubble({ msg }) {
   return (
     <View style={st.bubbleRow}>
       <AvatarEmoji emoji={msg.avatar} />
       <View style={st.bubble}>
-        {/* Name + Role */}
         <View style={st.bubbleHeader}>
           <Text style={st.bubbleName}>{msg.name}</Text>
           <Text style={st.bubbleRole}> ~ {msg.role}</Text>
         </View>
-        {/* Message text */}
         <Text style={st.bubbleText}>{msg.text}</Text>
-        {/* Timestamp */}
         <Text style={st.bubbleTime}>{msg.time}</Text>
       </View>
     </View>
   );
 }
 
-// ─── Main Screen ─────────────────────────────────────────────────────────────
+const BOTTOM_TAB_HEIGHT = 60;
+
+// ─── Helper: format current time ─────────────────────────────────────────────
+function getFormattedTime() {
+  const now = new Date();
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const month = months[now.getMonth()];
+  const day = now.getDate();
+  let hours = now.getHours();
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${month} ${day} - ${hours}:${minutes} ${ampm}`;
+}
+
+// ─── Helper: format date group ────────────────────────────────────────────────
+function getDateGroup() {
+  const now = new Date();
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return `${months[now.getMonth()]} ${now.getDate()}`;
+}
+
 export default function MessagesScreen({ navigation }) {
+  const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const scrollRef = useRef(null);
-
   const [activeTab, setActiveTab] = useState('Profile');
+
+  // ─── Send Message ────────────────────────────────────────────────────────
+  const handleSend = () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
+    const newMessage = {
+      id: Date.now().toString(),
+      name: 'You',
+      role: 'Store Employee',
+      avatar: '🧑🏽',
+      text: trimmed,
+      time: getFormattedTime(),
+      dateGroup: getDateGroup(),
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setInput('');
+
+    // Auto scroll to bottom after send
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
 
   // Group messages by date
   const dateGroups = [];
   const seen = new Set();
-  MESSAGES.forEach(m => {
+  messages.forEach(m => {
     if (!seen.has(m.dateGroup)) {
       seen.add(m.dateGroup);
       dateGroups.push(m.dateGroup);
@@ -100,64 +162,65 @@ export default function MessagesScreen({ navigation }) {
   });
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
+    <View style={st.root}>
       <SafeAreaView style={st.safe} edges={['top']}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-        {/* ── Header ── */}
-        <View style={st.header}>
-          {/* Left: hamburger + title */}
-          <TouchableOpacity style={st.menuBtn} activeOpacity={0.7}>
-            <Menu size={22} color="#111827" />
-          </TouchableOpacity>
-          <View style={st.headerCenter}>
-            <Text style={st.headerTitle}>Messages</Text>
-            <Text style={st.headerSub}>View customer and team messages</Text>
-          </View>
-          {/* Right: 3-dot + avatar */}
-          <View style={st.headerRight}>
-            <TouchableOpacity style={st.dotBtn} activeOpacity={0.7}>
-              <MoreVertical size={20} color="#6B7280" />
-            </TouchableOpacity>
-            <View style={st.avatar}>
-              <Text style={st.avatarTxt}>AV</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Messages List ── */}
-        <ScrollView
-          ref={scrollRef}
-          style={st.msgList}
-          contentContainerStyle={st.msgListContent}
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={() =>
-            scrollRef.current?.scrollToEnd({ animated: false })
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={
+            Platform.OS === 'ios' ? BOTTOM_TAB_HEIGHT : -70
           }
         >
-          {dateGroups.map(dateGroup => (
-            <View key={dateGroup}>
-              <DateSeparator label={dateGroup} />
-              {MESSAGES.filter(m => m.dateGroup === dateGroup).map(msg => (
-                <MessageBubble key={msg.id} msg={msg} />
-              ))}
+          {/* ── Header ── */}
+          <View style={st.header}>
+            <TouchableOpacity style={st.menuBtn} activeOpacity={0.7}>
+              <Menu size={22} color="#111827" />
+            </TouchableOpacity>
+            <View style={st.headerCenter}>
+              <Text style={st.headerTitle}>Messages</Text>
+              <Text style={st.headerSub}>View customer and team messages</Text>
             </View>
-          ))}
-        </ScrollView>
+            <View style={st.headerRight}>
+              <TouchableOpacity style={st.dotBtn} activeOpacity={0.7}>
+                <MoreVertical size={20} color="#6B7280" />
+              </TouchableOpacity>
+              <View style={st.avatar}>
+                <Text style={st.avatarTxt}>AV</Text>
+              </View>
+            </View>
+          </View>
 
-        {/* ── Input Bar ── */}
-        <SafeAreaView edges={['bottom']} style={st.inputSafeArea}>
+          {/* ── Messages List ── */}
+          <ScrollView
+            ref={scrollRef}
+            style={st.msgList}
+            contentContainerStyle={st.msgListContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            onContentSizeChange={() =>
+              scrollRef.current?.scrollToEnd({ animated: true })
+            }
+          >
+            {dateGroups.map(dateGroup => (
+              <View key={dateGroup}>
+                <DateSeparator label={dateGroup} />
+                {messages
+                  .filter(m => m.dateGroup === dateGroup)
+                  .map(msg => (
+                    <MessageBubble key={msg.id} msg={msg} />
+                  ))}
+              </View>
+            ))}
+          </ScrollView>
+
+          {/* ── Input Bar ── */}
           <View style={st.inputBar}>
-            {/* Paperclip */}
             <TouchableOpacity style={st.inputIcon} activeOpacity={0.7}>
               <Paperclip size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
-            {/* Text input */}
             <TextInput
               style={st.textInput}
               placeholder="Write a message..."
@@ -166,22 +229,33 @@ export default function MessagesScreen({ navigation }) {
               onChangeText={setInput}
               multiline
               returnKeyType="default"
+              onSubmitEditing={handleSend}
             />
 
-            {/* Camera */}
             <TouchableOpacity style={st.inputIcon} activeOpacity={0.7}>
               <Camera size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
-            {/* Send button */}
-            <TouchableOpacity style={st.sendBtn} activeOpacity={0.85}>
+            {/* Send button — active only when input has text */}
+            <TouchableOpacity
+              style={[st.sendBtn, !input.trim() && st.sendBtnDisabled]}
+              activeOpacity={0.85}
+              onPress={handleSend}
+              disabled={!input.trim()}
+            >
               <Send size={18} color="#fff" />
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
 
+          {/* Spacer so input bar sits above bottom tab */}
+          <View style={{ height: BOTTOM_TAB_HEIGHT }} />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+
+      {/* ── Bottom Tab pinned at bottom ── */}
+      <View style={st.bottomTabWrapper}>
         <CustomBottomTab
-          activeTab="Profile"
+          activeTab={activeTab}
           onTabPress={tab => {
             setActiveTab(tab);
             switch (tab) {
@@ -197,20 +271,19 @@ export default function MessagesScreen({ navigation }) {
               case 'Orders':
                 navigation.navigate('Orders');
                 break;
-
               case 'Profile':
                 navigation.navigate('Profile');
                 break;
             }
           }}
         />
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </View>
+    </View>
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
 const st = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#fff' },
   safe: { flex: 1, backgroundColor: '#fff' },
 
   // Header
@@ -254,9 +327,8 @@ const st = StyleSheet.create({
   msgListContent: {
     paddingHorizontal: 14,
     paddingTop: 24,
-    paddingBottom: 12,
+    paddingBottom: 16,
     flexGrow: 1,
-    justifyContent: 'flex-end',
   },
 
   // Date separator
@@ -328,7 +400,6 @@ const st = StyleSheet.create({
   },
 
   // Input bar
-  inputSafeArea: { backgroundColor: '#fff' },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -338,6 +409,7 @@ const st = StyleSheet.create({
     borderTopColor: '#f1f2f4',
     backgroundColor: '#fff',
     gap: 6,
+    marginBottom: 30,
   },
   inputIcon: {
     width: 36,
@@ -360,5 +432,18 @@ const st = StyleSheet.create({
     backgroundColor: '#2e86de',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  sendBtnDisabled: {
+    backgroundColor: '#93c5fd',
+  },
+
+  // Bottom tab pinned
+  bottomTabWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    height: BOTTOM_TAB_HEIGHT,
   },
 });

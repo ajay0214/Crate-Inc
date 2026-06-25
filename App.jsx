@@ -13,6 +13,8 @@ import Catolog from './Pages/Catolog';
 
 import Orders from './Pages/Orders';
 
+import CustomHeader from './Components/CustomHeader';
+
 const Stack = createNativeStackNavigator();
 
 const App = () => {
@@ -26,6 +28,16 @@ const App = () => {
             headerShown: false,
           }}
         />
+
+        {/* <Stack.Screen
+          name="Dashboard"
+          component={Dashboard}
+          options={({ navigation }) => ({
+            header: () => (
+              <CustomHeader title="Overview" showBack={true} cartCount={3} />
+            ),
+          })}
+        /> */}
 
         <Stack.Screen
           name="Dashboard"

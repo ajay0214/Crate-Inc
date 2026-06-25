@@ -262,6 +262,8 @@ const cartStyles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     minHeight: '95%',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
@@ -1011,7 +1013,7 @@ export default function OrderGuideScreen({ navigation }) {
   const Header = () => (
     <View style={styles.header}>
       <TouchableOpacity style={styles.menuButton} activeOpacity={0.7}>
-        <Menu size={22} color="#111827" />
+        <ChevronLeft size={24} color="#666" />
       </TouchableOpacity>
       <View style={styles.headerTitleWrap}>
         <Text style={styles.headerTitle}>Order Guide</Text>
@@ -1511,12 +1513,15 @@ export default function OrderGuideScreen({ navigation }) {
               case 'Home':
                 navigation.navigate('Dashboard');
                 break;
+
               case 'Category':
                 navigation.navigate('OrderGuide');
                 break;
+
               case 'Cart':
                 navigation.navigate('Catolog');
                 break;
+
               case 'Orders':
                 navigation.navigate('Orders');
                 break;
@@ -1560,6 +1565,9 @@ const styles = StyleSheet.create({
     height: 34,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 0.5,
+    borderColor: '#666',
+    borderRadius: 25,
   },
   headerTitleWrap: { flex: 1, marginLeft: 8 },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },

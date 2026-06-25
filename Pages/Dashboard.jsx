@@ -22,6 +22,8 @@ import {
   XCircle,
   DollarSign,
   TrendingUp,
+  ChevronLeft,
+  ArrowLeft,
 } from 'lucide-react-native';
 import CustomBottomTab from './CustomBottomTab';
 
@@ -125,7 +127,7 @@ export default function DashboardScreen({ navigation }) {
   const Header = () => (
     <View style={styles.header}>
       <TouchableOpacity style={styles.menuButton} activeOpacity={0.7}>
-        <Menu size={22} color="#111827" />
+        <ChevronLeft size={24} color="#666" />
       </TouchableOpacity>
 
       <View style={styles.headerTitleWrap}>
@@ -317,23 +319,6 @@ export default function DashboardScreen({ navigation }) {
     return (
       <View style={styles.overviewContainer}>
         {/* Section header */}
-        <View style={styles.overviewHeader}>
-          <View
-            style={[styles.overviewIconBox, { backgroundColor: '#EFF6FF' }]}
-          >
-            <TrendingUp size={18} color="#2e86de" />
-          </View>
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={styles.overviewTitle}>Order Overview</Text>
-            <Text style={styles.overviewSubtitle}>This month's summary</Text>
-          </View>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <Text style={styles.viewAllLink}>View all</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* 4 stat cards grid */}
         <View style={styles.statsGrid}>
@@ -535,6 +520,9 @@ const styles = StyleSheet.create({
     height: 34,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 0.5,
+    borderColor: '#666',
+    borderRadius: 25,
   },
   headerTitleWrap: {
     flex: 1,

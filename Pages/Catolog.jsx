@@ -44,7 +44,6 @@ import CustomBottomTab from './CustomBottomTab';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-// ─── Unsplash fallback images by category ─────────────────────────────────
 const FALLBACK_IMAGES = {
   'Baked Goods':
     'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80',
@@ -63,7 +62,6 @@ function getProductImage(product) {
   return FALLBACK_IMAGES[product.category] || DEFAULT_FALLBACK;
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
 function getAllProducts() {
   const all = [];
   DATA.forEach(cat => {
@@ -83,7 +81,6 @@ function getSubcategories(categoryName) {
   return cat ? ['All', ...cat.subcategories.map(s => s.name)] : ['All'];
 }
 
-// ─── Calendar ──────────────────────────────────────────────────────────────
 const MONTH_NAMES = [
   'January',
   'February',
@@ -252,7 +249,6 @@ const calStyles = StyleSheet.create({
   dayNumToday: { color: '#3b82f6', fontWeight: '700' },
 });
 
-// ─── Inline Cart Panel ─────────────────────────────────────────────────────
 function InlineCartPanel({
   visible,
   onClose,
@@ -267,10 +263,8 @@ function InlineCartPanel({
     0,
   );
 
-  const incCartQty = id => {
+  const incCartQty = id =>
     setCartItems(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
-  };
-
   const decCartQty = id => {
     const current = cartItems[id] || 0;
     if (current <= 1) {
@@ -283,7 +277,6 @@ function InlineCartPanel({
       setCartItems(c => ({ ...c, [id]: current - 1 }));
     }
   };
-
   const removeItem = id => {
     setCartItems(c => {
       const n = { ...c };
@@ -296,16 +289,12 @@ function InlineCartPanel({
 
   return (
     <View style={cartPanelStyles.container}>
-      {/* Backdrop — tapping closes the panel */}
       <TouchableOpacity
         style={cartPanelStyles.backdrop}
         activeOpacity={1}
         onPress={onClose}
       />
-
-      {/* Panel sheet */}
       <View style={cartPanelStyles.sheet}>
-        {/* ── Header ── */}
         <View style={cartPanelStyles.header}>
           <Text style={cartPanelStyles.title}>
             Your Cart{' '}
@@ -318,8 +307,6 @@ function InlineCartPanel({
             <X size={22} color="#1a1a1a" />
           </TouchableOpacity>
         </View>
-
-        {/* ── Items ── */}
         {cartProductList.length === 0 ? (
           <View style={cartPanelStyles.empty}>
             <ShoppingCart size={48} color="#ccc" />
@@ -332,14 +319,11 @@ function InlineCartPanel({
               const lineTotal = product.price * qty;
               return (
                 <View key={product.id} style={cartPanelStyles.itemRow}>
-                  {/* Product image */}
                   <Image
                     source={{ uri: getProductImage(product) }}
                     style={cartPanelStyles.itemImg}
                     resizeMode="cover"
                   />
-
-                  {/* Middle: name + sku/price + qty stepper */}
                   <View style={cartPanelStyles.itemMid}>
                     <Text style={cartPanelStyles.itemName} numberOfLines={1}>
                       {product.name}
@@ -348,7 +332,6 @@ function InlineCartPanel({
                       SKU-{product.id} · ${product.price.toFixed(2)} /{' '}
                       {product.unit}
                     </Text>
-                    {/* qty stepper: − qty + */}
                     <View style={cartPanelStyles.stepperRow}>
                       <TouchableOpacity
                         style={cartPanelStyles.stepBtn}
@@ -367,8 +350,6 @@ function InlineCartPanel({
                       </TouchableOpacity>
                     </View>
                   </View>
-
-                  {/* Right: delete icon + line total */}
                   <View style={cartPanelStyles.itemRight}>
                     <TouchableOpacity
                       onPress={() => removeItem(product.id)}
@@ -385,8 +366,6 @@ function InlineCartPanel({
             })}
           </ScrollView>
         )}
-
-        {/* ── Footer ── */}
         <View style={cartPanelStyles.footer}>
           <View style={cartPanelStyles.totalRow}>
             <Text style={cartPanelStyles.totalLabel}>Total</Text>
@@ -405,7 +384,6 @@ function InlineCartPanel({
 }
 
 const cartPanelStyles = StyleSheet.create({
-  // Absolutely positioned overlay filling the whole screen
   container: {
     position: 'absolute',
     top: 0,
@@ -431,6 +409,8 @@ const cartPanelStyles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     minHeight: '95%',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
@@ -442,7 +422,6 @@ const cartPanelStyles = StyleSheet.create({
   countTxt: { fontSize: 16, fontWeight: '400', color: '#555' },
   empty: { alignItems: 'center', paddingVertical: 56 },
   emptyTxt: { fontSize: 14, color: '#aaa', marginTop: 14 },
-
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -468,7 +447,6 @@ const cartPanelStyles = StyleSheet.create({
     marginBottom: 3,
   },
   itemMeta: { fontSize: 11, color: '#888', marginBottom: 10 },
-
   stepperRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -499,7 +477,6 @@ const cartPanelStyles = StyleSheet.create({
     lineHeight: 30,
     paddingHorizontal: 6,
   },
-
   itemRight: {
     alignItems: 'flex-end',
     justifyContent: 'space-between',
@@ -513,7 +490,6 @@ const cartPanelStyles = StyleSheet.create({
     color: '#1a1a1a',
     marginTop: 4,
   },
-
   footer: {
     paddingTop: 16,
     borderTopWidth: 1,
@@ -537,7 +513,6 @@ const cartPanelStyles = StyleSheet.create({
   checkoutTxt: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
 
-// ─── Filter Modal ──────────────────────────────────────────────────────────
 function FilterModal({
   visible,
   onClose,
@@ -554,16 +529,13 @@ function FilterModal({
   const [catOpen, setCatOpen] = useState(false);
   const [subOpen, setSubOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-
   const localSubcats = getSubcategories(localCat);
-
   const sortOptions = [
     { value: 'name-az', label: 'Name A-Z' },
     { value: 'name-za', label: 'Name Z-A' },
     { value: 'price-asc', label: 'Price Low-High' },
     { value: 'price-desc', label: 'Price High-Low' },
   ];
-
   React.useEffect(() => {
     if (visible) {
       setLocalCat(category);
@@ -574,14 +546,12 @@ function FilterModal({
       setSortOpen(false);
     }
   }, [visible]);
-
   const handleApply = () => {
     setCategory(localCat);
     setSubcategory(localSub);
     setSortBy(localSort);
     onClose();
   };
-
   const handleClear = () => {
     setLocalCat('All');
     setLocalSub('All');
@@ -590,7 +560,6 @@ function FilterModal({
     setSubOpen(false);
     setSortOpen(false);
   };
-
   const getSortLabel = val =>
     sortOptions.find(o => o.value === val)?.label || 'Name A-Z';
 
@@ -608,7 +577,6 @@ function FilterModal({
           onPress={onClose}
         />
         <View style={fStyles.box}>
-          {/* Header */}
           <View style={fStyles.header}>
             <Text style={fStyles.title}>Catalog Filters</Text>
             <TouchableOpacity
@@ -618,16 +586,10 @@ function FilterModal({
               <Text style={fStyles.closeX}>✕</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Search bar */}
-
-          {/* Filters label */}
           <View style={fStyles.filterLabelRow}>
             <SlidersHorizontal size={18} color="#111827" />
             <Text style={fStyles.filterLabelTxt}>Filters</Text>
           </View>
-
-          {/* Category + Subcategory */}
           <View style={fStyles.dropRow}>
             <View style={fStyles.dropCol}>
               <Text style={fStyles.dropLabel}>Category</Text>
@@ -679,7 +641,6 @@ function FilterModal({
                 </View>
               )}
             </View>
-
             <View style={fStyles.dropCol}>
               <Text style={fStyles.dropLabel}>Subcategory</Text>
               <TouchableOpacity
@@ -730,8 +691,6 @@ function FilterModal({
               )}
             </View>
           </View>
-
-          {/* Sort by */}
           <View style={fStyles.sortRow}>
             <View style={{ flex: 1 }}>
               <Text style={fStyles.dropLabel}>Sort by</Text>
@@ -779,11 +738,9 @@ function FilterModal({
               <Text style={fStyles.filtersChipTxt}> Filters</Text>
             </View>
           </View>
-
           <TouchableOpacity style={fStyles.clearRow} onPress={handleClear}>
             <Text style={fStyles.clearTxt}>↺ Clear all</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={fStyles.applyBtn} onPress={handleApply}>
             <Text style={fStyles.applyTxt}>Apply Filters</Text>
           </TouchableOpacity>
@@ -916,10 +873,11 @@ const fStyles = StyleSheet.create({
   applyTxt: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
 
-// ─── Product Card ──────────────────────────────────────────────────────────
+// ─── Product Card — Horizontal: image LEFT, all details RIGHT ─────────────
 function ProductCard({
   product,
   qty,
+  cartQty,
   onIncrement,
   onDecrement,
   onAddToCart,
@@ -929,54 +887,77 @@ function ProductCard({
 }) {
   return (
     <View style={cardStyles.card}>
+      {/* ── LEFT: Square image, no overlay buttons ── */}
       <View style={cardStyles.imgWrap}>
         <Image
           source={{ uri: getProductImage(product) }}
           style={cardStyles.img}
           resizeMode="cover"
         />
-        <TouchableOpacity style={cardStyles.favBtn} onPress={onToggleFav}>
-          <Text style={cardStyles.favIcon}>{isFav ? '★' : '☆'}</Text>
-        </TouchableOpacity>
       </View>
+
+      {/* ── RIGHT: All product info including star ── */}
       <View style={cardStyles.body}>
-        <Text style={cardStyles.name} numberOfLines={2}>
-          {product.name}
-        </Text>
+        {/* Row 1: product name + star icon (top-right of details) */}
+        <View style={cardStyles.topRow}>
+          <Text style={cardStyles.name} numberOfLines={2}>
+            {product.name}
+          </Text>
+          <TouchableOpacity
+            style={cardStyles.favBtn}
+            onPress={onToggleFav}
+            activeOpacity={0.7}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            <Star
+              size={20}
+              color="#2e86de"
+              fill={isFav ? '#2e86de' : 'none'}
+              strokeWidth={1.8}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Category */}
         <Text style={cardStyles.cat}>{product.category}</Text>
+
+        {/* Pack size */}
         <Text style={cardStyles.pack}>Pack Size: 1 {product.unit}</Text>
+
+        {/* Price */}
         <Text style={cardStyles.price}>
           ${product.price.toFixed(2)} / {product.unit}
         </Text>
-        <View style={cardStyles.qtyRow}>
+
+        {/* Qty stepper — full width of right column */}
+        {!isInCart ? (
           <TouchableOpacity
-            style={cardStyles.qtyBtn}
-            onPress={onDecrement}
-            activeOpacity={0.7}
+            style={cardStyles.addBtnFull}
+            onPress={onAddToCart}
+            activeOpacity={0.85}
           >
-            <Text style={cardStyles.qtyBtnTxt}>-</Text>
+            <ShoppingCart size={15} color="#fff" />
+            <Text style={cardStyles.addTxt}>{'  '}Add to Cart</Text>
           </TouchableOpacity>
-          <View style={cardStyles.qtyValWrap}>
-            <Text style={cardStyles.qtyVal}>{qty}</Text>
+        ) : (
+          <View style={cardStyles.qtyRowFull}>
+            <TouchableOpacity style={cardStyles.qtyBtn} onPress={onDecrement}>
+              {cartQty <= 1 ? (
+                <Trash2 size={17} color="#ef4444" />
+              ) : (
+                <Text style={cardStyles.qtyBtnTxt}>-</Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={cardStyles.qtyValWrap}>
+              <Text style={cardStyles.qtyVal}>{cartQty}</Text>
+            </View>
+
+            <TouchableOpacity style={cardStyles.qtyBtn} onPress={onIncrement}>
+              <Text style={cardStyles.qtyBtnTxt}>+</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={cardStyles.qtyBtn}
-            onPress={onIncrement}
-            activeOpacity={0.7}
-          >
-            <Text style={cardStyles.qtyBtnTxt}>+</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity
-          style={[cardStyles.addBtn, isInCart && cardStyles.addBtnAdded]}
-          onPress={!isInCart ? onAddToCart : undefined}
-          activeOpacity={isInCart ? 1 : 0.85}
-        >
-          <ShoppingCart size={18} color={isInCart ? '#666' : '#fff'} />
-          <Text style={[cardStyles.addTxt, isInCart && cardStyles.addTxtAdded]}>
-            {isInCart ? ' Added to Cart' : ' Add to Cart'}
-          </Text>
-        </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -984,84 +965,158 @@ function ProductCard({
 
 const cardStyles = StyleSheet.create({
   card: {
-    flex: 1,
-    marginHorizontal: 5,
+    flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
+    marginHorizontal: 12,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#ebebeb',
+    alignItems: 'flex-start', // important
+  },
+
+  // Left: fixed-width square image
+  imgWrap: {
+    width: 140,
+    height: 150,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 10,
+    margin: 10,
+    marginTop: 15,
   },
-  imgWrap: { position: 'relative' },
-  img: { width: '100%', height: 128 },
-  favBtn: {
-    position: 'absolute',
-    top: 7,
-    right: 7,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    alignItems: 'center',
-    justifyContent: 'center',
+
+  img: {
+    width: '100%',
+    height: '100%',
   },
-  favIcon: { fontSize: 15, color: '#0c6437', marginTop: -5 },
-  body: { padding: 9 },
+
+  // Right: details column
+  body: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+
+  // Top row: name text + star button side by side
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   name: {
-    fontSize: 12.5,
+    flex: 1,
+    fontSize: 13,
     fontWeight: '700',
     color: '#1a1a1a',
-    marginBottom: 2,
+    lineHeight: 21,
+    marginRight: 4,
   },
-  cat: { fontSize: 11, color: '#888', marginBottom: 1 },
-  pack: { fontSize: 11, color: '#888', marginBottom: 5 },
-  price: { fontSize: 14, fontWeight: '700', color: '#1a1a1a', marginBottom: 8 },
+  favBtn: {
+    marginTop: 1,
+  },
+
+  cat: { fontSize: 12, color: '#888', marginBottom: 1 },
+  pack: { fontSize: 12, color: '#888', marginBottom: 7 },
+  price: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 5,
+  },
+
+  // Qty stepper spans full right-column width
+
+  qtyBtnTxt: { fontSize: 20, color: '#1a1a1a', lineHeight: 24 },
+
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+
   qtyRow: {
     flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 6,
-    overflow: 'hidden',
-    marginBottom: 8,
+    width: 90,
     height: 34,
-  },
-  qtyBtn: {
-    width: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    overflow: 'hidden',
     backgroundColor: '#fff',
   },
-  qtyBtnTxt: { fontSize: 18, color: '#1a1a1a', lineHeight: 22 },
+
+  qtyBtn: {
+    width: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   qtyValWrap: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#d1d5db',
   },
-  qtyVal: { fontSize: 14, fontWeight: '600', color: '#1a1a1a' },
+
+  qtyVal: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#111',
+  },
+
   addBtn: {
-    flexDirection: 'row',
+    flex: 1,
+    marginLeft: 8,
+    height: 38,
+    borderRadius: 8,
     backgroundColor: '#3b82f6',
-    borderRadius: 7,
-    paddingVertical: 9,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   addBtnAdded: {
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
   },
-  addTxt: { color: '#fff', fontSize: 12.5, fontWeight: '700' },
-  addTxtAdded: { color: '#666' },
+
+  addTxt: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  addTxtAdded: {
+    color: '#666',
+  },
+  addBtnFull: {
+    height: 38,
+    borderRadius: 8,
+    backgroundColor: '#3b82f6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 6,
+    width: 170,
+  },
+
+  qtyRowFull: {
+    flexDirection: 'row',
+    height: 38,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    marginTop: 6,
+    width: 165,
+  },
 });
 
-// ─── SVG-like icons using Text ─────────────────────────────────────────────
 function HamburgerIcon() {
   return (
     <View style={{ gap: 4, justifyContent: 'center' }}>
@@ -1093,7 +1148,6 @@ function HamburgerIcon() {
   );
 }
 
-// ─── Main Catalog Screen ───────────────────────────────────────────────────
 export default function Catalog({ navigation }) {
   const [deliveryDate, setDeliveryDate] = useState(new Date(2026, 5, 12));
   const [showCalendar, setShowCalendar] = useState(false);
@@ -1105,7 +1159,10 @@ export default function Catalog({ navigation }) {
   const [subcategory, setSubcategory] = useState('All');
   const [sortBy, setSortBy] = useState('name-az');
 
-  const [quantities, setQuantities] = useState({});
+  const [catOpen, setCatOpen] = useState(false);
+  const [subOpen, setSubOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+
   const [favorites, setFavorites] = useState({});
   const [cartItems, setCartItems] = useState({});
 
@@ -1122,10 +1179,7 @@ export default function Catalog({ navigation }) {
   const loadOrderGuides = async () => {
     try {
       const data = await AsyncStorage.getItem('ORDER_GUIDES');
-
-      if (data) {
-        setOrderGuides(JSON.parse(data));
-      }
+      if (data) setOrderGuides(JSON.parse(data));
     } catch (e) {
       console.log(e);
     }
@@ -1147,11 +1201,7 @@ export default function Catalog({ navigation }) {
         }}
       >
         <View
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: 16,
-            padding: 16,
-          }}
+          style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16 }}
         >
           <View
             style={{
@@ -1160,38 +1210,19 @@ export default function Catalog({ navigation }) {
               marginBottom: 12,
             }}
           >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: '700',
-              }}
-            >
+            <Text style={{ fontSize: 18, fontWeight: '700' }}>
               Add to Order Guide
             </Text>
-
             <TouchableOpacity onPress={() => setShowGuideModal(false)}>
               <X size={20} />
             </TouchableOpacity>
           </View>
-
-          <Text
-            style={{
-              color: '#666',
-              marginBottom: 16,
-            }}
-          >
+          <Text style={{ color: '#666', marginBottom: 16 }}>
             Select a guide and group.
           </Text>
-
-          <Text
-            style={{
-              fontWeight: '700',
-              marginBottom: 16,
-            }}
-          >
+          <Text style={{ fontWeight: '700', marginBottom: 16 }}>
             {selectedProduct?.name}
           </Text>
-
           <ScrollView>
             {orderGuides.map(guide => (
               <View
@@ -1203,15 +1234,9 @@ export default function Catalog({ navigation }) {
                   marginBottom: 10,
                 }}
               >
-                <Text
-                  style={{
-                    padding: 12,
-                    fontWeight: '700',
-                  }}
-                >
+                <Text style={{ padding: 12, fontWeight: '700' }}>
                   {guide.name}
                 </Text>
-
                 {guide.groups.map(group => (
                   <TouchableOpacity
                     key={group.id}
@@ -1225,13 +1250,7 @@ export default function Catalog({ navigation }) {
                     }
                   >
                     <Text>{group.name}</Text>
-
-                    <Text
-                      style={{
-                        color: '#999',
-                        fontSize: 12,
-                      }}
-                    >
+                    <Text style={{ color: '#999', fontSize: 12 }}>
                       {group.items.length} item(s)
                     </Text>
                   </TouchableOpacity>
@@ -1246,48 +1265,29 @@ export default function Catalog({ navigation }) {
 
   const addProductToGroup = async (guideId, groupId, product) => {
     const data = await AsyncStorage.getItem('ORDER_GUIDES');
-
     if (!data) return;
-
     const guides = JSON.parse(data);
-
     const updated = guides.map(guide => {
       if (guide.id !== guideId) return guide;
-
       return {
         ...guide,
         groups: guide.groups.map(group => {
           if (group.id !== groupId) return group;
-
           const alreadyExists = group.items.find(
             item => item.id === product.id,
           );
-
-          if (alreadyExists) {
-            return group;
-          }
-
+          if (alreadyExists) return group;
           return {
             ...group,
-            items: [
-              ...group.items,
-              {
-                ...product,
-                quantity: 1,
-              },
-            ],
+            items: [...group.items, { ...product, quantity: 1 }],
           };
         }),
         updatedAt: new Date().toISOString(),
       };
     });
-
     await AsyncStorage.setItem('ORDER_GUIDES', JSON.stringify(updated));
-
     await loadOrderGuides();
-
     setShowGuideModal(false);
-
     setShowGuideModal(false);
   };
 
@@ -1320,34 +1320,48 @@ export default function Catalog({ navigation }) {
     return list;
   }, [category, subcategory, sortBy]);
 
-  const getQty = id => quantities[id] || 1;
   const incQty = id => {
-    setQuantities(q => ({ ...q, [id]: (q[id] || 1) + 1 }));
-    setCartItems(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
+    setCartItems(c => ({
+      ...c,
+      [id]: (c[id] || 0) + 1,
+    }));
   };
+
   const decQty = id => {
-    setQuantities(q => ({ ...q, [id]: Math.max(1, (q[id] || 1) - 1) }));
-    setCartItems(c => ({ ...c, [id]: Math.max(0, (c[id] || 0) - 1) }));
+    setCartItems(c => {
+      const current = c[id] || 0;
+
+      if (current <= 1) {
+        const updated = { ...c };
+        delete updated[id];
+        return updated;
+      }
+
+      return {
+        ...c,
+        [id]: current - 1,
+      };
+    });
   };
-  const addToCart = id =>
-    setCartItems(c => ({ ...c, [id]: (c[id] || 0) + getQty(id) }));
+  const addToCart = id => {
+    setCartItems(c => ({
+      ...c,
+      [id]: 1,
+    }));
+  };
   const toggleFav = id => setFavorites(f => ({ ...f, [id]: !f[id] }));
 
-  const rows = [];
-  for (let i = 0; i < filteredProducts.length; i += 2) {
-    rows.push(filteredProducts.slice(i, i + 2));
-  }
-
   return (
-    // Use position: 'relative' on the outer wrapper so the panel overlay can position itself absolutely within it
     <View style={{ flex: 1 }}>
       <SafeAreaView style={styles.safe}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-        {/* ── Header ── */}
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <HamburgerIcon />
+            <TouchableOpacity style={styles.menuButton} activeOpacity={0.7}>
+              <ChevronLeft size={24} color="#666" />
+            </TouchableOpacity>
             <View style={{ marginLeft: 10 }}>
               <Text style={styles.headerTitle}>Catalog</Text>
               <Text style={styles.headerSub}>Browse product catalog</Text>
@@ -1357,7 +1371,6 @@ export default function Catalog({ navigation }) {
             <View style={styles.avatar}>
               <Text style={styles.avatarTxt}>AV</Text>
             </View>
-            {/* Cart icon — opens inline cart panel */}
             <TouchableOpacity
               style={styles.cartWrap}
               onPress={() => setShowCart(true)}
@@ -1374,15 +1387,15 @@ export default function Catalog({ navigation }) {
           </View>
         </View>
 
-        {/* ── Scrollable content ── */}
+        {/* Single-column FlatList */}
         <FlatList
-          data={rows}
-          keyExtractor={(_, i) => String(i)}
+          data={filteredProducts}
+          keyExtractor={item => String(item.id)}
           showsVerticalScrollIndicator={false}
           stickyHeaderIndices={[0]}
           ListHeaderComponent={() => (
-            <View>
-              {/* Delivery Date / Cutoff row */}
+            <View style={{ backgroundColor: '#fff' }}>
+              {/* Delivery Date / Cutoff */}
               <View style={styles.infoRow}>
                 <TouchableOpacity
                   style={styles.infoBox}
@@ -1415,7 +1428,6 @@ export default function Catalog({ navigation }) {
                 </View>
               </View>
 
-              {/* Inline Calendar */}
               {showCalendar && (
                 <InlineCalendar
                   selectedDate={deliveryDate}
@@ -1424,18 +1436,16 @@ export default function Catalog({ navigation }) {
                 />
               )}
 
-              {/* Show Filters button */}
+              {/* Search + Filter */}
               <View style={styles.searchFilterRow}>
                 <View style={styles.searchContainer}>
                   <Search size={16} color="#777" />
-
                   <TextInput
                     placeholder="Search products..."
                     placeholderTextColor="#777"
                     style={styles.searchInput}
                   />
                 </View>
-
                 <TouchableOpacity
                   style={styles.filterContainer}
                   onPress={() => setShowFilters(true)}
@@ -1444,6 +1454,93 @@ export default function Catalog({ navigation }) {
                   <SlidersHorizontal size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
+
+              <View style={styles.filterChipRow}>
+                <TouchableOpacity
+                  style={styles.filterChip}
+                  onPress={() => setCatOpen(!catOpen)}
+                >
+                  <Text style={styles.filterChipText}>Category</Text>
+                  <ChevronDown size={14} color="#111827" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.filterChip}
+                  onPress={() => setSubOpen(!subOpen)}
+                >
+                  <Text style={styles.filterChipText}>Subcategory</Text>
+                  <ChevronDown size={14} color="#111827" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.filterChip}
+                  onPress={() => setSortOpen(!sortOpen)}
+                >
+                  <Text style={styles.filterChipText}>Sort</Text>
+                  <ChevronDown size={14} color="#111827" />
+                </TouchableOpacity>
+              </View>
+
+              {catOpen && (
+                <View style={styles.dropdownBox}>
+                  <ScrollView nestedScrollEnabled style={{ maxHeight: 180 }}>
+                    {CATEGORIES.map(item => (
+                      <TouchableOpacity
+                        key={item}
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setCategory(item);
+                          setSubcategory('All');
+                          setCatOpen(false);
+                        }}
+                      >
+                        <Text>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {subOpen && (
+                <View style={styles.dropdownBox}>
+                  <ScrollView nestedScrollEnabled style={{ maxHeight: 180 }}>
+                    {getSubcategories(category).map(item => (
+                      <TouchableOpacity
+                        key={item}
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setSubcategory(item);
+                          setSubOpen(false);
+                        }}
+                      >
+                        <Text>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {sortOpen && (
+                <View style={styles.dropdownBox}>
+                  {[
+                    { value: 'name-az', label: 'Name A-Z' },
+                    { value: 'name-za', label: 'Name Z-A' },
+                    { value: 'price-asc', label: 'Price Low-High' },
+                    { value: 'price-desc', label: 'Price High-Low' },
+                  ].map(item => (
+                    <TouchableOpacity
+                      key={item.value}
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setSortBy(item.value);
+                        setSortOpen(false);
+                      }}
+                    >
+                      <Text>{item.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
 
               {/* Product count */}
               <View style={styles.countRow}>
@@ -1454,36 +1551,25 @@ export default function Catalog({ navigation }) {
               </View>
             </View>
           )}
-          contentContainerStyle={styles.grid}
-          renderItem={({ item: row }) => (
-            <View style={styles.gridRow}>
-              {row.map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  qty={getQty(product.id)}
-                  onIncrement={() => incQty(product.id)}
-                  onDecrement={() => decQty(product.id)}
-                  onAddToCart={() => addToCart(product.id)}
-                  isFav={!!favorites[product.id]}
-                  onToggleFav={() => {
-                    setSelectedProduct(product);
-                    loadOrderGuides();
-                    setShowGuideModal(true);
-                  }}
-                  isInCart={
-                    !!(cartItems[product.id] && cartItems[product.id] > 0)
-                  }
-                />
-              ))}
-              {row.length === 1 && (
-                <View style={{ flex: 1, marginHorizontal: 5 }} />
-              )}
-            </View>
+          contentContainerStyle={styles.list}
+          renderItem={({ item: product }) => (
+            <ProductCard
+              product={product}
+              cartQty={cartItems[product.id] || 0}
+              onIncrement={() => incQty(product.id)}
+              onDecrement={() => decQty(product.id)}
+              onAddToCart={() => addToCart(product.id)}
+              isFav={!!favorites[product.id]}
+              onToggleFav={() => {
+                setSelectedProduct(product);
+                loadOrderGuides();
+                setShowGuideModal(true);
+              }}
+              isInCart={!!(cartItems[product.id] && cartItems[product.id] > 0)}
+            />
           )}
         />
 
-        {/* ── Filter Modal ── */}
         <FilterModal
           visible={showFilters}
           onClose={() => setShowFilters(false)}
@@ -1505,21 +1591,27 @@ export default function Catalog({ navigation }) {
               case 'Home':
                 navigation.navigate('Dashboard');
                 break;
+
               case 'Category':
                 navigation.navigate('OrderGuide');
                 break;
+
               case 'Cart':
                 navigation.navigate('Catolog');
                 break;
+
               case 'Orders':
                 navigation.navigate('Orders');
+                break;
+
+              case 'Profile':
+                navigation.navigate('Profile');
                 break;
             }
           }}
         />
       </SafeAreaView>
 
-      {/* ── Inline Cart Panel — rendered OUTSIDE SafeAreaView so it covers everything ── */}
       <InlineCartPanel
         visible={showCart}
         onClose={() => setShowCart(false)}
@@ -1531,13 +1623,12 @@ export default function Catalog({ navigation }) {
   );
 }
 
-// ─── Styles ────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
     backgroundColor: '#fff',
     paddingHorizontal: 16,
-
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1613,8 +1704,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   countTxt: { fontSize: 12, color: '#666' },
-  grid: { paddingBottom: 16 },
-  gridRow: { flexDirection: 'row', paddingHorizontal: 10, marginTop: 12 },
+  list: { paddingBottom: 20, paddingTop: 4 },
   searchFilterRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1622,7 +1712,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: '#fff',
   },
-
+  menuButton: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.5,
+    borderColor: '#666',
+    borderRadius: 25,
+  },
   searchContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -1634,14 +1732,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     height: 48,
   },
-
-  searchInput: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 15,
-    color: '#111827',
-  },
-
+  searchInput: { flex: 1, marginLeft: 10, fontSize: 15, color: '#111827' },
   filterContainer: {
     width: 46,
     height: 46,
@@ -1652,14 +1743,54 @@ const styles = StyleSheet.create({
     borderColor: '#2e86de',
     alignItems: 'center',
     justifyContent: 'center',
-
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 2,
     elevation: 2,
+  },
+  filterChipRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    backgroundColor: '#fff',
+  },
+
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    height: 38,
+    flex: 1,
+    marginHorizontal: 4,
+  },
+
+  filterChipText: {
+    fontSize: 10,
+    color: '#111827',
+    fontWeight: '500',
+  },
+
+  dropdownBox: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    elevation: 4,
+  },
+
+  dropdownItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
 });
